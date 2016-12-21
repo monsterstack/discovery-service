@@ -1,0 +1,19 @@
+{
+  "name": "discovery-service",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "coffee-script": "^1.12.2",
+    "config": "^1.24.0",
+    "connect": "^3.5.0",
+    "express": "^4.14.0",
+    "express.io": "^1.1.13",
+    "sha1": "^1.1.1"
+  }
+}

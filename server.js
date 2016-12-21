@@ -1,7 +1,6 @@
-const config = require('config');
-const sha1 = require('sha1');
+'use strict';
 
-const model = require('discovery-model').model;
+
 
 /**
  * Discovery Service is Responsible for pushing changes to
@@ -10,6 +9,11 @@ const model = require('discovery-model').model;
  * Discovery Service also provides a Rest API to request said ServiceDescriptor(s) on demand.
  */
 const main = () => {
+  const config = require('config');
+  const sha1 = require('sha1');
+  const debug = require('debug')('discovery-service');
+  const model = require('discovery-model').model;
+
   console.log("Starting Discovery Service");
   let app = require('express.io')();
 
@@ -23,6 +27,7 @@ const main = () => {
    * }
    */
   let subscribers = {};
+  let feeds = {};
 
   app.http().io();
 
@@ -31,27 +36,60 @@ const main = () => {
   app.io.route('services', {
     'subscribe': (req) => {
       let query = req.message;
-      let clientId = req.clientId;
       let key = sha(JSON.stringify(query));
 
+      /**
+       * Bundle all connected clients based on interested query 'sha'
+       * Also, keep track of the feed by query 'sha' such that the feed can
+       * be closed when it's usefullness ceases to exist
+       **/
       if(subscribers[key]) {
-        subscribers[key].push(clientId);
+        subscribers[key].push(req);
       } else {
-        subscribers[key] = [clientId];
-
+        subscribers[key] = [req];
+        feeds[key] = [];
         /* Start Query --
          * Need some handle on this so we can kill the query when all interested parties disconnect
          */
-        model.onChange(query, (err, change) => {
-          subscribers.forEach((clientId) => {
-            app.io.emit(clientId, change);
+        model.onServiceChange([query.types], (err, change) => {
+          let keys = Object.keys(subscribers);
+          keys.forEach((key) => {
+            let clients = subscribers[key];
+            // Falsey check
+            if(!feeds[key]) {
+              feeds[key] = change.record;
+            }
+            clients.forEach((client) => {
+              client.io.emit('service', change.change);
+            });
           });
+        });
+
+        /**
+         * Handle disconnect event.  In this situation we need to clean up
+         * the client connections / subscriptions and close all feeds that
+         * are no longer needed.
+         */
+        req.io.on('disconnect', (event) => {
+            debug('Disconnect Event');
+            debug(event);
+            subscribers[key].splice(clientId);
+
+            /** Clean it up 'bish' **/
+            if(subscribers[key].length === 0) {
+              feeds[key].closeFeed();
+              delete feeds[key];
+              delete subscribers[key];
+            }
         });
       }
     }
   });
 }
 
+/* Method main - Ha */
 if(require.main === module) {
   main();
 }
+
+module.exports.client = require('./libs/client');

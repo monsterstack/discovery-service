@@ -1,6 +1,6 @@
 'use strict';
 
-
+const glob = require('glob');
 
 /**
  * Discovery Service is Responsible for pushing changes to
@@ -32,6 +32,14 @@ const main = () => {
   app.http().io();
 
   app.listen(config.port, '0.0.0.0');
+
+  /* Http Routes */
+  glob("./api/v1/routes/*.routes.js", {}, (err, files) => {
+    files.forEach((file) => {
+      console.log(file);
+      require(file)(app);
+    });
+  });
 
   app.io.route('services', {
     'subscribe': (req) => {

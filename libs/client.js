@@ -1,25 +1,40 @@
 'use strict';
+
+const DEFAULT_ADDR = "http://localhost:7616";
+
 const socketIOClient = require('socket.io-client');
 
-const DiscoveryClient = (socket) => {
-  let self = this;
-  this.socket = socket;
+console.log(socketIOClient);
 
-  this.query = (types, resultHandler) => {
+/**
+ * Discovery Client
+ */
+class DiscoveryClient {
+  constructor(socket) {
+    this.socket = socket;
+  }
+
+  query(types, resultHandler) {
     console.log(`Performing query for types ${types}`)
 
-    self.socket.on('service', resultHandler);
+    this.socket.emit('services:subscribe', { types: types });
+
+    let handler;
+    if(resultHandler) {
+      handler = resultHandler;
+    } else {
+      handler = (change) => {
+        console.log(change);
+      }
+    }
+    this.socket.on('service', handler);
   }
 }
 
-const connect = (options) => {
-    let socket = socketIOClient(options.host);
+const connect = (options, callback) => {
+    let socket = socketIOClient(options.addr || 'http://localhost:7616');
 
-    socket.on('connect', handler.onConnect);
-    // socket.on('event', handler.onEvent);
-    socket.on('disconnect',  handler.onDisconnect);
-
-    return new DiscoveryClient(socket);
+    callback(new DiscoveryClient(socket));
 }
 
 module.exports.connect = connect;

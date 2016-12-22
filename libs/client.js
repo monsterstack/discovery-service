@@ -11,6 +11,10 @@ class DiscoveryClient {
     this.socket = socket;
   }
 
+  onDisconnect(handler) {
+    this.socket.on('disconnect', handler);
+  }
+
   query(types, resultHandler) {
     console.log(`Performing query for types ${types}`)
     console.log('Init');

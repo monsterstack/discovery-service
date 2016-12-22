@@ -4,8 +4,6 @@ const DEFAULT_ADDR = "http://localhost:7616";
 
 const socketIOClient = require('socket.io-client');
 
-console.log(socketIOClient);
-
 /**
  * Discovery Client
  */
@@ -16,7 +14,7 @@ class DiscoveryClient {
 
   query(types, resultHandler) {
     console.log(`Performing query for types ${types}`)
-
+    this.socket.emit('services:init', { types: types });
     this.socket.emit('services:subscribe', { types: types });
 
     let handler;

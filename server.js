@@ -42,6 +42,14 @@ const main = () => {
   });
 
   app.io.route('services', {
+    'init': (req) => {
+      let query = req.message;
+      model.findServicesByType(query.types).then((services) => {
+        services.forEach((service) => {
+          req.io.emit('service', service);
+        });
+      })
+    },
     'subscribe': (req) => {
       let query = req.message;
       let key = sha(JSON.stringify(query));

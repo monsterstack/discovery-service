@@ -34,7 +34,9 @@ class DiscoveryClient {
 const connect = (options, callback) => {
     let socket = socketIOClient(options.addr || 'http://localhost:7616');
 
-    callback(new DiscoveryClient(socket));
+    socket.on('connect', () => {
+      callback(new DiscoveryClient(socket));
+    });
 }
 
 module.exports.connect = connect;

@@ -9,14 +9,14 @@ const glob = require('glob');
  * Discovery Service also provides a Rest API to request said ServiceDescriptor(s) on demand.
  */
 const main = () => {
-  const http = require('http');
   const config = require('config');
   const sha1 = require('sha1');
   const debug = require('debug')('discovery-service');
   const model = require('discovery-model').model;
 
   console.log(`Starting Discovery Service on ${config.port}`);
-  let app = require('express')(http);
+  let app = require('express')();
+  let http = require('http').Server(app);
   let io = require('socket.io')(http);
 
   /*
@@ -39,28 +39,12 @@ const main = () => {
     });
   });
 
-
+  http.listen(config.port, () => {
+    console.log('listening on *:3000');
+  });
 
   io.on('connect', (socket) => {
     console.log("Got connection..");
-
-    /**
-      * Handle disconnect event.  In this situation we need to clean up
-      * the client connections / subscriptions and close all feeds that
-      * are no longer needed.
-      */
-    socket.on('disconnect', (event) => {
-      debug('Disconnect Event');
-      debug(event);
-      subscribers[key].splice(socket);
-
-      /** Clean it up 'bish' **/
-      if(subscribers[key].length === 0) {
-        feeds[key].closeFeed();
-        delete feeds[key];
-        delete subscribers[key];
-      }
-    });
 
     socket.on('init', (msg) => {
       debug(msg);
@@ -74,10 +58,27 @@ const main = () => {
     });
 
     socket.on('subscribe', (msg) => {
-      console.log(msg);
       debug(req);
       let query = req.data;
       let key = sha1(JSON.stringify(query));
+
+      /**
+        * Handle disconnect event.  In this situation we need to clean up
+        * the client connections / subscriptions and close all feeds that
+        * are no longer needed.
+        */
+      socket.on('disconnect', (event) => {
+        debug('Disconnect Event');
+        debug(event);
+        subscribers[key].splice(socket);
+
+        /** Clean it up 'bish' **/
+        if(subscribers[key].length === 0) {
+          feeds[key].closeFeed();
+          delete feeds[key];
+          delete subscribers[key];
+        }
+      });
 
       /**
         * Bundle all connected clients based on interested query 'sha'
@@ -108,9 +109,7 @@ const main = () => {
       }
     });
 
-    http.listen(config.port, () => {
-      console.log('listening on *:3000');
-    });
+
   });
 }
 

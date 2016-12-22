@@ -43,6 +43,7 @@ const main = () => {
 
   app.io.route('services', {
     'init': (req) => {
+      debug(req);
       let query = req.message;
       model.findServicesByType(query.types).then((services) => {
         services.forEach((service) => {
@@ -51,6 +52,7 @@ const main = () => {
       })
     },
     'subscribe': (req) => {
+      debug(req);
       let query = req.message;
       let key = sha(JSON.stringify(query));
 

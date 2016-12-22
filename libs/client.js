@@ -25,6 +25,7 @@ class DiscoveryClient {
         console.log(change);
       }
     }
+    console.log("Listening for changes");
     this.socket.on('service', handler);
   }
 }

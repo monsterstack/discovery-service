@@ -53,7 +53,7 @@ const main = () => {
   app.io.route('services:subscribe', (req) => {
       debug(req);
       let query = req.data;
-      let key = sha(JSON.stringify(query));
+      let key = sha1(JSON.stringify(query));
 
       /**
        * Bundle all connected clients based on interested query 'sha'

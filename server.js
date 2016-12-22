@@ -31,8 +31,6 @@ const main = () => {
 
   app.http().io();
 
-  app.listen(config.port, '0.0.0.0');
-
   /* Http Routes */
   glob("./api/v1/routes/*.routes.js", {}, (err, files) => {
     files.forEach((file) => {
@@ -47,6 +45,7 @@ const main = () => {
       let query = req.message;
       model.findServicesByType(query.types).then((services) => {
         services.forEach((service) => {
+          debug(service);
           req.io.emit('service', service);
         });
       })
@@ -103,6 +102,9 @@ const main = () => {
       }
     }
   });
+
+  app.listen(config.port, '0.0.0.0');
+
 }
 
 /* Method main - Ha */

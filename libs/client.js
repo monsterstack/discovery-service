@@ -14,7 +14,9 @@ class DiscoveryClient {
 
   query(types, resultHandler) {
     console.log(`Performing query for types ${types}`)
+    console.log('Init');
     this.socket.emit('services:init', { types: types });
+    console.log('Subscribe');
     this.socket.emit('services:subscribe', { types: types });
 
     let handler;

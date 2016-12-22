@@ -27,7 +27,10 @@ class DiscoveryClient {
       }
     }
     console.log("Listening for changes");
-    this.socket.on('service', handler);
+    this.socket.on('service.added', handler.added);
+    this.socket.on('service.removed', handler.removed);
+    this.socket.on('service.updated', handler.updated);
+    this.socket.on('service.init', handler.init);
   }
 }
 

@@ -40,26 +40,28 @@ const main = () => {
   });
 
   http.listen(config.port, () => {
-    console.log('listening on *:3000');
+    console.log(`listening on *:${config.port}`);
   });
 
-  io.on('connect', (socket) => {
+  io.on('connection', (socket) => {
     console.log("Got connection..");
 
-    socket.on('init', (msg) => {
+    socket.on('services:init', (msg) => {
       debug(msg);
-      let query = msg.data;
-      model.findServicesByType(query.types).then((services) => {
+      let query = msg;
+      model.findServicesByTypes(query.types).then((services) => {
+        console.log(services);
         services.forEach((service) => {
           debug(service);
-          socket.emit('service', service);
+          console.log(service);
+          client.emit('service.init', service);
         });
       });
     });
 
-    socket.on('subscribe', (msg) => {
-      debug(req);
-      let query = req.data;
+    socket.on('services:subscribe', (msg) => {
+      debug(msg);
+      let query = msg;
       let key = sha1(JSON.stringify(query));
 
       /**
@@ -102,7 +104,9 @@ const main = () => {
               feeds[key] = change.record;
             }
             clients.forEach((client) => {
-              client.emit('service', change.change);
+              client.emit('service.added', change.change);
+              client.emit('service.removed', change.change);
+              client.emit('service.updated', change.change);
             });
           });
         });

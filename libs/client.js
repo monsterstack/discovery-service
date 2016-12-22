@@ -3,7 +3,7 @@
 const DEFAULT_ADDR = "http://localhost:7616";
 
 const socketIOClient = require('socket.io-client');
-
+console.log(socketIOClient);
 /**
  * Discovery Client
  */

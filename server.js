@@ -9,13 +9,15 @@ const glob = require('glob');
  * Discovery Service also provides a Rest API to request said ServiceDescriptor(s) on demand.
  */
 const main = () => {
+  const http = require('http');
   const config = require('config');
   const sha1 = require('sha1');
   const debug = require('debug')('discovery-service');
   const model = require('discovery-model').model;
 
   console.log(`Starting Discovery Service on ${config.port}`);
-  let app = require('express.io')();
+  let app = require('express')(http);
+  let io = require('socket.io')(http);
 
   /*
    * Clients interested in discovery
@@ -29,8 +31,6 @@ const main = () => {
   let subscribers = {};
   let feeds = {};
 
-  app.http().io();
-
   /* Http Routes */
   glob("./api/v1/routes/*.routes.js", {}, (err, files) => {
     files.forEach((file) => {
@@ -39,31 +39,55 @@ const main = () => {
     });
   });
 
-  app.io.route('services:init', (req) => {
-      debug(req);
-      let query = req.data;
+
+
+  io.on('connect', (socket) => {
+    console.log("Got connection..");
+
+    /**
+      * Handle disconnect event.  In this situation we need to clean up
+      * the client connections / subscriptions and close all feeds that
+      * are no longer needed.
+      */
+    socket.on('disconnect', (event) => {
+      debug('Disconnect Event');
+      debug(event);
+      subscribers[key].splice(socket);
+
+      /** Clean it up 'bish' **/
+      if(subscribers[key].length === 0) {
+        feeds[key].closeFeed();
+        delete feeds[key];
+        delete subscribers[key];
+      }
+    });
+
+    socket.on('init', (msg) => {
+      debug(msg);
+      let query = msg.data;
       model.findServicesByType(query.types).then((services) => {
         services.forEach((service) => {
           debug(service);
-          req.io.emit('service', service);
+          socket.emit('service', service);
         });
       });
-  });
+    });
 
-  app.io.route('services:subscribe', (req) => {
+    socket.on('subscribe', (msg) => {
+      console.log(msg);
       debug(req);
       let query = req.data;
       let key = sha1(JSON.stringify(query));
 
       /**
-       * Bundle all connected clients based on interested query 'sha'
-       * Also, keep track of the feed by query 'sha' such that the feed can
-       * be closed when it's usefullness ceases to exist
-       **/
+        * Bundle all connected clients based on interested query 'sha'
+        * Also, keep track of the feed by query 'sha' such that the feed can
+        * be closed when it's usefullness ceases to exist
+        **/
       if(subscribers[key]) {
-        subscribers[key].push(req);
+        subscribers[key].push(socket);
       } else {
-        subscribers[key] = [req];
+        subscribers[key] = [socket];
         feeds[key] = [];
         /* Start Query --
          * Need some handle on this so we can kill the query when all interested parties disconnect
@@ -77,33 +101,15 @@ const main = () => {
               feeds[key] = change.record;
             }
             clients.forEach((client) => {
-              client.io.emit('service', change.change);
+              client.emit('service', change.change);
             });
           });
         });
-
-        /**
-         * Handle disconnect event.  In this situation we need to clean up
-         * the client connections / subscriptions and close all feeds that
-         * are no longer needed.
-         */
-        req.io.on('disconnect', (event) => {
-            debug('Disconnect Event');
-            debug(event);
-            subscribers[key].splice(clientId);
-
-            /** Clean it up 'bish' **/
-            if(subscribers[key].length === 0) {
-              feeds[key].closeFeed();
-              delete feeds[key];
-              delete subscribers[key];
-            }
-        });
       }
+    });
+
+    app.listen(config.port, '0.0.0.0');
   });
-
-  app.listen(config.port, '0.0.0.0');
-
 }
 
 /* Method main - Ha */

@@ -3,7 +3,6 @@
 const DEFAULT_ADDR = "http://localhost:7616";
 
 const socketIOClient = require('socket.io-client');
-console.log(socketIOClient);
 /**
  * Discovery Client
  */
@@ -33,7 +32,7 @@ class DiscoveryClient {
 }
 
 const connect = (options, callback) => {
-    let socket = socketIOClient(options.addr || 'http://localhost:7616');
+    let socket = socketIOClient.connect(options.addr || 'http://localhost:7616');
 
     callback(new DiscoveryClient(socket));
 }

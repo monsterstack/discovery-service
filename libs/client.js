@@ -21,16 +21,15 @@ class DiscoveryClient {
     let handler;
     if(resultHandler) {
       handler = resultHandler;
+      console.log("Listening for changes");
+      this.socket.on('service.added', handler.added);
+      this.socket.on('service.removed', handler.removed);
+      this.socket.on('service.updated', handler.updated);
+      this.socket.on('service.init', handler.init);
     } else {
-      handler = (change) => {
-        console.log(change);
-      }
+      console.log("*********** Missing handler **************");
     }
-    console.log("Listening for changes");
-    this.socket.on('service.added', handler.added);
-    this.socket.on('service.removed', handler.removed);
-    this.socket.on('service.updated', handler.updated);
-    this.socket.on('service.init', handler.init);
+
   }
 }
 

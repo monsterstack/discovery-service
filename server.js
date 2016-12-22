@@ -54,7 +54,7 @@ const main = () => {
         services.forEach((service) => {
           debug(service);
           console.log(service);
-          client.emit('service.init', service);
+          socket.emit('service.init', service);
         });
       });
     });
@@ -72,14 +72,14 @@ const main = () => {
       socket.on('disconnect', (event) => {
         debug('Disconnect Event');
         debug(event);
-        subscribers[key].splice(socket);
-
-        /** Clean it up 'bish' **/
-        if(subscribers[key].length === 0) {
-          feeds[key].closeFeed();
-          delete feeds[key];
-          delete subscribers[key];
-        }
+        // subscribers[key].splice(socket);
+        //
+        // /** Clean it up 'bish' **/
+        // if(subscribers[key].length === 0) {
+        //   feeds[key].closeFeed();
+        //   delete feeds[key];
+        //   delete subscribers[key];
+        // }
       });
 
       /**

@@ -14,7 +14,7 @@ const main = () => {
   const debug = require('debug')('discovery-service');
   const model = require('discovery-model').model;
 
-  console.log("Starting Discovery Service");
+  console.log(`Starting Discovery Service on ${config.port}`);
   let app = require('express.io')();
 
   /*
@@ -39,8 +39,7 @@ const main = () => {
     });
   });
 
-  app.io.route('services', {
-    'init': (req) => {
+  app.io.route('services:init', (req) => {
       debug(req);
       let query = req.message;
       model.findServicesByType(query.types).then((services) => {
@@ -48,9 +47,10 @@ const main = () => {
           debug(service);
           req.io.emit('service', service);
         });
-      })
-    },
-    'subscribe': (req) => {
+      });
+  });
+
+  app.io.route('services:subscribe', (req) => {
       debug(req);
       let query = req.message;
       let key = sha(JSON.stringify(query));
@@ -100,7 +100,6 @@ const main = () => {
             }
         });
       }
-    }
   });
 
   app.listen(config.port, '0.0.0.0');

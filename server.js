@@ -108,7 +108,9 @@ const main = () => {
       }
     });
 
-    app.listen(config.port, '0.0.0.0');
+    http.listen(config.port, () => {
+      console.log('listening on *:3000');
+    });
   });
 }
 

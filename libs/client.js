@@ -32,7 +32,7 @@ class DiscoveryClient {
 }
 
 const connect = (options, callback) => {
-    let socket = socketIOClient.connect(options.addr || 'http://localhost:7616');
+    let socket = socketIOClient(options.addr || 'http://localhost:7616');
 
     callback(new DiscoveryClient(socket));
 }

@@ -46,17 +46,27 @@ module.exports = class Health {
       needle.get(service.endpoint + service.health, (error, response) => {
         if(error) {
           reject(error);
-          // Flag offline...
-          service.status = model.STATUS_OFFLINE;
-          model.updateService(service).then((service) => {
-            if(service) {
-              console.log(service);
-              debug(`updated service ${service.id}`);
-              if(this.badHealthWebHook) {
-                this.badHealthWebHook.emit('Service Issue', service);
+          // Get Service By Id and update Status to 'Offline'
+          if(service.status === model.STATUS_OFFLINE) {
+            // Delete
+            model.deleteService(service).then((deletedServices) => {
+              console.log("Service deleted");
+            }).error((err) => {
+              debug(err);
+            });
+          } else {
+            // Flag offline...
+            service.status = model.STATUS_OFFLINE;
+            model.updateService(service).then((service) => {
+              if(service) {
+                console.log(service);
+                debug(`updated service ${service.id}`);
+                if(this.badHealthWebHook) {
+                  this.badHealthWebHook.emit('Service Issue', service);
+                }
               }
-            }
-          });
+            });
+          }
         } else if(response.status === 200) {
           resolve(response.body);
 

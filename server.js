@@ -52,7 +52,6 @@ const main = () => {
   /* Http Routes */
   glob("./api/v1/routes/*.routes.js", {}, (err, files) => {
     files.forEach((file) => {
-      console.log(file);
       require(file)(app);
     });
   });
@@ -106,6 +105,23 @@ const main = () => {
         debug(error);
       })
     }); // -- close on-services:offline
+
+    socket.on('services:online', (msg) => {
+      debug(msg);
+      let serviceId = msg.serviceId;
+      model.findServiceById(serviceId).then((service) => {
+        if(service) {
+          service.status = model.STATUS_ONLINE;
+          model.updateService(service).then((service) => {
+            debug(`updated status of service ${service.id} to online`);
+          }).error((error) => {
+            debug(error);
+          });
+        }
+      }).error((error) => {
+        debug(error);
+      })
+    }); // -- close on-services:online
 
     socket.on('services:subscribe', (msg) => {
       debug(msg);

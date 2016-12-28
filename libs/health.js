@@ -11,8 +11,34 @@ module.exports = class Health {
       this.badHealthWebHook = new WebHook(options.bad_health_web_hook);
   }
 
+  healthIsGoodFx(service) {
+    return (callback) => {
+      // checkService and callback(err) if failed
+      // for now let it through.
+      callback(null);
+    }
+  }
+
+  swaggerIsGoodFx(service) {
+    return (callback) => {
+      // Need to check swagger.json for existence and validation
+      callback(null);
+    }
+  }
+
+  docsAreGoodFx(service) {
+    return (callback) => {
+      // Need to check docs for existence
+      callback(null);
+    }
+  }
+
+  /**
+   * Check the Health of the service.
+   * 1. GET healthCheckRoute and if not 200, flag offline.
+   * 2. If status is already offline and healthCheckRoute fails, delete service.
+   */
   check(service) {
-    console.log(service);
     let p = new Promise((resolve, reject) => {
       // Check the health of the service.
       // Would be nice if we had 'web-hook' integration here such that we can
@@ -20,15 +46,28 @@ module.exports = class Health {
       needle.get(service.endpoint + service.health, (error, response) => {
         if(error) {
           reject(error);
+          // Flag offline...
+          service.status = model.STATUS_OFFLINE;
+          model.updateService(service).then((service) => {
+            if(service) {
+              console.log(service);
+              debug(`updated service ${service.id}`);
+              if(this.badHealthWebHook) {
+                this.badHealthWebHook.emit('Service Issue', service);
+              }
+            }
+          });
         } else if(response.status === 200) {
           resolve(response.body);
 
           // Get Service By Id and update Status to 'Online'
           model.findServiceById(service.id).then((service) => {
-            service.status = model.STATUS_ONLINE;
-            model.updateService(service).then((service) => {
-              debug(`updated service ${service.id}`);
-            });
+            if(service) {
+              service.status = model.STATUS_ONLINE;
+              model.updateService(service).then((service) => {
+                debug(`updated service ${service.id}`);
+              });
+            }
           });
         } else {
           reject(response.body);
@@ -44,9 +83,11 @@ module.exports = class Health {
           } else {
             service.status = model.STATUS_OFFLINE;
             model.updateService(service).then((service) => {
-              debug(`updated service ${service.id}`);
-              if(this.badHealthWebHook) {
-                this.badHealthWebHook.emit('Service Issue', service);
+              if(service) {
+                debug(`updated service ${service.id}`);
+                if(this.badHealthWebHook) {
+                  this.badHealthWebHook.emit('Service Issue', service);
+                }
               }
             });
           }

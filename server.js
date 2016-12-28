@@ -10,6 +10,7 @@ const glob = require('glob');
  */
 const main = () => {
   const config = require('config');
+  const async = require('async');
   const sha1 = require('sha1');
   const debug = require('debug')('discovery-service');
   const model = require('discovery-model').model;
@@ -63,36 +64,9 @@ const main = () => {
   io.on('connection', (socket) => {
     console.log("Got connection..");
 
-    socket.on('services:init', (msg) => {
-      debug(msg);
-      let query = msg;
-      let descriptor = msg.descriptor;
-      // Validate Descriptor and verify that the service is 'kosher'
-      // i.e. swagger.json is good
-      // health route exists and returns 200
-
-
-      if(descriptor) {
-        // Save Descriptor
-        model.saveService(descriptor).then((service) => {
-          debug(`Saved Service Descriptor in registry for ${service.id}`);
-        }).error((err) => {
-          debug('Error registering service');
-          console.log(error);
-        });
-      }
-
-      // Find services by types..
-      model.findServicesByTypes(query.types).then((services) => {
-        console.log(services);
-        services.forEach((service) => {
-          debug(service);
-          console.log(service);
-          socket.emit('service.init', service);
-        });
-      });
-    });
-
+    /**
+     * Listen for metric data from proxy.
+     */
     socket.on('services:metrics', (msg) => {
       debug(msg);
       // Store Metrics (i.e. response_time) and associate with service
@@ -114,7 +88,7 @@ const main = () => {
           console.log(err);
         });
       }
-    });
+    }); // -- close on-services:metrics
 
     socket.on('services:subscribe', (msg) => {
       debug(msg);
@@ -137,7 +111,7 @@ const main = () => {
           delete feeds[key];
           delete subscribers[key];
         }
-      });
+      }); // close on-disconnect
 
       /**
         * Bundle all connected clients based on interested query 'sha'
@@ -150,8 +124,8 @@ const main = () => {
         subscribers[key] = [socket];
         feeds[key] = [];
         /* Start Query --
-         * Need some handle on this so we can kill the query when all interested parties disconnect
-         */
+          * Need some handle on this so we can kill the query when all interested parties disconnect
+          */
         model.onServiceChange([query.types], (err, change) => {
           let keys = Object.keys(subscribers);
           keys.forEach((key) => {
@@ -168,8 +142,51 @@ const main = () => {
           });
         });
       }
-    });
-  });
+    }); // -- close on-services:subscribe
+
+    socket.on('services:init', (msg) => {
+      debug(msg);
+      let query = msg;
+      let descriptor = msg.descriptor;
+      // Validate Descriptor and verify that the service is 'kosher'
+      // Waterfall??
+      // i.e. swagger.json is good
+      // docs route exists and returns 200
+      // health route exists and returns 200
+      if(descriptor) {
+        async.waterfall([
+          new Health().swaggerIsGoodFx(descriptor),
+          new Health().healthIsGoodFx(descriptor),
+          new Health().docsAreGoodFx(descriptor)
+        ], (err, results) => {
+          if(err) {
+            debug(err);
+          } else if(results) {
+            console.log(results);
+            if(descriptor) {
+              // Save Descriptor
+              model.saveService(descriptor).then((service) => {
+                debug(`Saved Service Descriptor in registry for ${service.id}`);
+              }).error((err) => {
+                debug('Error registering service');
+                console.log(error);
+              });
+            }
+
+            // Find services by types..
+            model.findServicesByTypes(query.types).then((services) => {
+              console.log(services);
+              services.forEach((service) => {
+                debug(service);
+                console.log(service);
+                socket.emit('service.init', service);
+              });
+            });
+          }
+        });
+      }
+    }); // -- close on-services.init
+  }); // -- close on-connection
 }
 
 /* Method main - Ha */

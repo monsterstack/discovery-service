@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "async": "^2.1.4",
     "coffee-script": "^1.12.2",
     "config": "^1.24.0",
     "connect": "2.x",

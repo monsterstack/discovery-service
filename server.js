@@ -70,7 +70,8 @@ const main = () => {
       debug(msg);
       // Store Metrics (i.e. response_time) and associate with service
       let metric = msg;
-      let serviceId = msg._id;
+      let serviceId = msg.serviceId;
+      let value = msg.value;
       if(metric.type === RESPONSE_TIME_METRIC_KEY) {
         // append response_time to service.rtimes
         model.findServiceById(serviceId).then((service) => {

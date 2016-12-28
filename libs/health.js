@@ -1,6 +1,7 @@
 'use strict';
 const Promise = require('promise');
-const needle = require('needle');
+//const needle = require('needle');
+const request = require('request');
 const model = require('discovery-model').model;
 const WebHook = require('./webHook.js');
 const debug = require('debug')('discovery-health');
@@ -43,7 +44,7 @@ module.exports = class Health {
       // Check the health of the service.
       // Would be nice if we had 'web-hook' integration here such that we can
       // inform interested parties of failed checks.
-      needle.get(service.endpoint + service.health, (error, response) => {
+      request.get(service.endpoint + service.healthCheckRoute, (error, response, body) => {
         if(error) {
           reject(error);
           // Get Service By Id and update Status to 'Offline'
@@ -67,7 +68,8 @@ module.exports = class Health {
               }
             });
           }
-        } else if(response.status === 200) {
+        } else if(response.statusCode === 200) {
+          console.log(">>>>>>>>>RESPONSE 200");
           resolve(response.body);
 
           // Get Service By Id and update Status to 'Online'
@@ -81,6 +83,8 @@ module.exports = class Health {
           });
         } else {
           reject(response.body);
+          console.log(response.statusCode);
+          console.log(">>>>>>>>>RESPONSE NOT OK");
 
           // Get Service By Id and update Status to 'Offline'
           if(service.status === model.STATUS_OFFLINE) {

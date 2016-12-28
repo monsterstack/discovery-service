@@ -13,6 +13,8 @@ const main = () => {
   const sha1 = require('sha1');
   const debug = require('debug')('discovery-service');
   const model = require('discovery-model').model;
+  const Health = require('./libs/health.js');
+  const HEALTH_CHECK_INTERVAL = 5000;
 
   console.log(`Starting Discovery Service on ${config.port}`);
   let app = require('express')();
@@ -30,6 +32,20 @@ const main = () => {
    */
   let subscribers = {};
   let feeds = {};
+
+  setInterval(() => {
+    console.log('health check');
+    model.allServices().then((services) => {
+      services.forEach((service) => {
+        let health = new Health();
+        health.check(service).then((response) => {
+          console.log(response);
+        }).catch((err) => {
+          console.log(err);
+        });
+      });
+    });
+  }, HEALTH_CHECK_INTERVAL);
 
   /* Http Routes */
   glob("./api/v1/routes/*.routes.js", {}, (err, files) => {
@@ -59,6 +75,23 @@ const main = () => {
       });
     });
 
+    socket.on('services:metrics', (msg) => {
+      debug(msg);
+      // Store Metrics (i.e. response_time) and associate with service
+      let metric = msg;
+      let serviceId = msg._id;
+      if(metric.type === "response_time") {
+        // append response_time to service.rtimes
+        model.findServiceById(serviceId).then((service) => {
+          if(service.rtimes) {
+            service.rtimes.push(value);
+          }
+        }).error((err) => {
+          console.log(err);
+        });
+      }
+    });
+
     socket.on('services:subscribe', (msg) => {
       debug(msg);
       let query = msg;
@@ -72,14 +105,14 @@ const main = () => {
       socket.on('disconnect', (event) => {
         debug('Disconnect Event');
         debug(event);
-        // subscribers[key].splice(socket);
-        //
-        // /** Clean it up 'bish' **/
-        // if(subscribers[key].length === 0) {
-        //   feeds[key].closeFeed();
-        //   delete feeds[key];
-        //   delete subscribers[key];
-        // }
+        subscribers[key].splice(socket);
+
+        /** Clean it up 'bish' **/
+        if(subscribers[key].length === 0) {
+          //feeds[key].closeFeed();
+          delete feeds[key];
+          delete subscribers[key];
+        }
       });
 
       /**
@@ -112,8 +145,6 @@ const main = () => {
         });
       }
     });
-
-
   });
 }
 

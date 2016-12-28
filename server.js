@@ -66,6 +66,23 @@ const main = () => {
     socket.on('services:init', (msg) => {
       debug(msg);
       let query = msg;
+      let descriptor = msg.descriptor;
+      // Validate Descriptor and verify that the service is 'kosher'
+      // i.e. swagger.json is good
+      // health route exists and returns 200
+
+
+      if(descriptor) {
+        // Save Descriptor
+        model.saveService(descriptor).then((service) => {
+          debug(`Saved Service Descriptor in registry for ${service.id}`);
+        }).error((err) => {
+          debug('Error registering service');
+          console.log(error);
+        });
+      }
+
+      // Find services by types..
       model.findServicesByTypes(query.types).then((services) => {
         console.log(services);
         services.forEach((service) => {

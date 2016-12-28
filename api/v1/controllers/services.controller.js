@@ -25,7 +25,11 @@ const getServices = (app) => {
         });
       } else {
         // Nothing to find.
-        res.status(HttpStatus.OK).send([]);
+        discoveryModel.allServices().then((services) => {
+          res.status(HttpStatus.OK).send(services);
+        }).error((err) => {
+          new Error(HttpStatus.INTERNAL_SERVER_ERROR, err.message).writeResponse(res);
+        });
       }
     } catch (err) {
       new Error(HttpStatus.INTERNAL_SERVER_ERROR, err.message).writeResponse(res);

@@ -15,6 +15,7 @@ const main = () => {
   const model = require('discovery-model').model;
   const Health = require('./libs/health.js');
   const HEALTH_CHECK_INTERVAL = 5000;
+  const RESPONSE_TIME_METRIC_KEY = "response_time";
 
   console.log(`Starting Discovery Service on ${config.port}`);
   let app = require('express')();
@@ -80,13 +81,19 @@ const main = () => {
       // Store Metrics (i.e. response_time) and associate with service
       let metric = msg;
       let serviceId = msg._id;
-      if(metric.type === "response_time") {
+      if(metric.type === RESPONSE_TIME_METRIC_KEY) {
         // append response_time to service.rtimes
         model.findServiceById(serviceId).then((service) => {
           if(service.rtimes) {
-            service.rtimes.push(value);
+            if(service.rtimes.length > 0 && service.rtimes.length < 10){
+              service.rtimes.splice(0, 1);
+              service.rtimes.push(value);
+            } else {
+              service.rtimes.push(value);
+            }
           }
         }).error((err) => {
+          console.log("Failed to find related service...");
           console.log(err);
         });
       }

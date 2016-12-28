@@ -15,7 +15,7 @@ const main = () => {
   const debug = require('debug')('discovery-service');
   const model = require('discovery-model').model;
   const Health = require('./libs/health.js');
-  const HEALTH_CHECK_INTERVAL = 5000;
+  const HEALTH_CHECK_INTERVAL = config.healthCheck.interval;
   const RESPONSE_TIME_METRIC_KEY = "response_time";
 
   console.log(`Starting Discovery Service on ${config.port}`);
@@ -89,6 +89,23 @@ const main = () => {
         });
       }
     }); // -- close on-services:metrics
+
+    socket.on('services:offline', (msg) => {
+      debug(msg);
+      let serviceId = msg.serviceId;
+      model.findServiceById(serviceId).then((service) => {
+        if(service) {
+          service.status = model.STATUS_OFFLINE;
+          model.updateService(service).then((service) => {
+            debug(`updated status of service ${service.id} to offline`);
+          }).error((error) => {
+            debug(error);
+          });
+        }
+      }).error((error) => {
+        debug(error);
+      })
+    }); // -- close on-services:offline
 
     socket.on('services:subscribe', (msg) => {
       debug(msg);

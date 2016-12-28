@@ -1,6 +1,5 @@
 'use strict';
 const Promise = require('promise');
-//const needle = require('needle');
 const request = require('request');
 const model = require('discovery-model').model;
 const WebHook = require('./webHook.js');
@@ -13,10 +12,15 @@ module.exports = class Health {
   }
 
   healthIsGoodFx(service) {
+    let self = this;
     return (callback) => {
       // checkService and callback(err) if failed
-      // for now let it through.
-      callback(null);
+      self.checkService(service).then((result) => {
+        console.log("No error");
+        callback(null);
+      }).catch((error) => {
+        callback(error);
+      });
     }
   }
 

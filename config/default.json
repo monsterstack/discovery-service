@@ -1,3 +1,6 @@
 {
-  "port": 7616
+  "port": 7616,
+  "healthCheck": {
+    "interval": 30000
+  }
 }

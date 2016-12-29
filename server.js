@@ -63,7 +63,7 @@ const main = () => {
     model.allServices().then((services) => {
       services.forEach((service) => {
         let health = new Health();
-        health.check(service).then((response) => {
+        health.check(service, true).then((response) => {
           debug(response);
         }).catch((err) => {
           console.log(err);

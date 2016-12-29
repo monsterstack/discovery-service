@@ -174,34 +174,36 @@ const main = () => {
         }
       }); // close on-disconnect
 
-      /**
-        * Bundle all connected clients based on interested query 'sha'
-        * Also, keep track of the feed by query 'sha' such that the feed can
-        * be closed when it's usefullness ceases to exist
-        **/
-      if(subscribers[key]) {
-        subscribers[key].push(socket);
-      } else {
-        subscribers[key] = [socket];
-        feeds[key] = [];
-        /* Start Query --
-          * Need some handle on this so we can kill the query when all interested parties disconnect
-          */
-        model.onServiceChange([query.types], (err, change) => {
-          let keys = Object.keys(subscribers);
-          keys.forEach((key) => {
-            let clients = subscribers[key];
-            // Falsey check
-            if(!feeds[key]) {
-              feeds[key] = change.record;
-            }
-            clients.forEach((client) => {
-              client.emit('service.added', change.change);
-              client.emit('service.removed', change.change);
-              client.emit('service.updated', change.change);
+      if(query.types && query.types.length > 0) {
+        /**
+          * Bundle all connected clients based on interested query 'sha'
+          * Also, keep track of the feed by query 'sha' such that the feed can
+          * be closed when it's usefullness ceases to exist
+          **/
+        if(subscribers[key]) {
+          subscribers[key].push(socket);
+        } else {
+          subscribers[key] = [socket];
+          feeds[key] = [];
+          /* Start Query --
+            * Need some handle on this so we can kill the query when all interested parties disconnect
+            */
+          model.onServiceChange(query.types, (err, change) => {
+            let keys = Object.keys(subscribers);
+            keys.forEach((key) => {
+              let clients = subscribers[key];
+              // Falsey check
+              if(!feeds[key]) {
+                feeds[key] = change.record;
+              }
+              clients.forEach((client) => {
+                client.emit('service.added', change.change);
+                client.emit('service.removed', change.change);
+                client.emit('service.updated', change.change);
+              });
             });
           });
-        });
+        }
       }
     }); // -- close on-services:subscribe
 

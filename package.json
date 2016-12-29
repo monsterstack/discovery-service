@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "app-root-path": "^2.0.1",
     "async": "^2.1.4",
     "coffee-script": "^1.12.2",
     "config": "^1.24.0",
@@ -17,8 +18,10 @@
     "discovery-model": "https://github.com/zacharyrote/discovery-model#development",
     "discovery-proxy": "https://github.com/zacharyrote/discovery-proxy#development",
     "express": "^4.14.0",
+    "external-ip": "^0.2.4",
     "glob": "^7.1.1",
     "http-status": "^0.2.3",
+    "ip": "^1.1.4",
     "needle": "^1.4.3",
     "node-uuid": "^1.4.7",
     "request": "^2.79.0",

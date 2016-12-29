@@ -1,9 +1,9 @@
 'use strict';
 
 const glob = require('glob');
-const proxy = require('discovery-proxy');
-
+const Promise = require('promise');
 const uuid = require('node-uuid');
+
 
 /**
  * Discovery Service is Responsible for pushing changes to
@@ -13,6 +13,7 @@ const uuid = require('node-uuid');
  */
 const main = () => {
   const config = require('config');
+  const proxy = require('discovery-proxy');
   const async = require('async');
   const sha1 = require('sha1');
   const debug = require('debug')('discovery-service');
@@ -21,24 +22,37 @@ const main = () => {
   const HEALTH_CHECK_INTERVAL = config.healthCheck.interval;
   const RESPONSE_TIME_METRIC_KEY = "response_time";
 
+  const startup = require('./libs/startup.js');
+
+  const NAME = 'DiscoveryService';
+  const REGION = 'us-east-1';
+  const STAGE = 'dev';
+  const VERSION = 'v1';
+  const ID = uuid.v1();
+
   /**
    * Construct my announcement
    */
-  const me = () => {
+  const getMe = () => {
     let descriptor = {
-      endpoint: 'http://google.com',
       type: 'DiscoveryService',
-      healthCheckRoute: '/',
-      schemaRoute: '/schema',
+      healthCheckRoute: '/health',
+      schemaRoute: '/swagger.json',
       timestamp: new Date(),
-      id: uuid.v1(),
-      region: 'us-east-1',
-      stage: 'dev',
+      id: ID,
+      region: REGION,
+      stage: STAGE,
       status: 'Online',
-      version: '2.0'
+      version: VERSION
     };
 
-    return descriptor;
+    let p = new Promise((resolve, reject) => {
+      let ip = require('ip');
+      console.log(ip.address());
+      descriptor.endpoint = "http://"+ip.address()+":"+config.port+"/api/v1"
+      resolve(descriptor);
+    });
+    return p;
   }
 
   console.log(`Starting Discovery Service on ${config.port}`);
@@ -58,34 +72,26 @@ const main = () => {
   let subscribers = {};
   let feeds = {};
 
-  setInterval(() => {
-    debug('health check');
-    model.allServices().then((services) => {
-      services.forEach((service) => {
-        let health = new Health();
-        health.check(service, true).then((response) => {
-          debug(response);
-        }).catch((err) => {
-          console.log(err);
-        });
-      });
+  // Dispatch Proxy -- init / announce
+  getMe().then((me) => {
+    console.log(me);
+    proxy.connect({addr:'http://127.0.0.1:7616'}, (p) => {
+      p.bind({ descriptor: me, types: [] });
     });
-  }, HEALTH_CHECK_INTERVAL);
+  }).catch((err) => {
+    console.log(err);
+  });
+
+
+
+  /** Health Check Schedule **/
+  startup.scheduleHealthCheck(model, HEALTH_CHECK_INTERVAL);
 
   /* Http Routes */
-  glob("./api/v1/routes/*.routes.js", {}, (err, files) => {
-    files.forEach((file) => {
-      require(file)(app);
-    });
-  });
+  startup.loadHttpRoutes(app, proxy);
 
   http.listen(config.port, () => {
     console.log(`listening on *:${config.port}`);
-  });
-
-  // Dispatch Proxy -- init / announce
-  proxy.connect({addr:'http://127.0.0.1:7616'}, (p) => {
-    p.bind({ descriptor: me(), types: [] });
   });
 
   io.on('connection', (socket) => {
@@ -212,16 +218,10 @@ const main = () => {
       let query = msg;
       let descriptor = msg.descriptor;
       // Validate Descriptor and verify that the service is 'kosher'
-      // Waterfall??
-      // i.e. swagger.json is good
-      // docs route exists and returns 200
-      // health route exists and returns 200
       if(descriptor) {
-        async.waterfall([
-          new Health().swaggerIsGoodFx(descriptor),
-          new Health().healthIsGoodFx(descriptor),
-          new Health().docsAreGoodFx(descriptor)
-        ], (err, results) => {
+        async.waterfall(
+          startup.createValidationPipeline(descriptor),
+          (err, results) => {
           if(err) {
             debug(err);
           } else {

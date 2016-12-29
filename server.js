@@ -21,7 +21,9 @@ const main = () => {
   const HEALTH_CHECK_INTERVAL = config.healthCheck.interval;
   const RESPONSE_TIME_METRIC_KEY = "response_time";
 
-
+  /**
+   * Construct my announcement
+   */
   const me = () => {
     let descriptor = {
       endpoint: 'http://google.com',
@@ -57,12 +59,12 @@ const main = () => {
   let feeds = {};
 
   setInterval(() => {
-    console.log('health check');
+    debug('health check');
     model.allServices().then((services) => {
       services.forEach((service) => {
         let health = new Health();
         health.check(service).then((response) => {
-          console.log(response);
+          debug(response);
         }).catch((err) => {
           console.log(err);
         });
@@ -83,12 +85,10 @@ const main = () => {
 
   // Dispatch Proxy -- init / announce
   proxy.connect({addr:'http://127.0.0.1:7616'}, (p) => {
-    console.log("************** CONNECTED *************");
-    p.bind({ descriptor: me(), types: ['FooService'] });
+    p.bind({ descriptor: me(), types: [] });
   });
 
   io.on('connection', (socket) => {
-    console.log("Got connection..");
 
     /**
      * Listen for metric data from proxy.
@@ -222,24 +222,20 @@ const main = () => {
         ], (err, results) => {
           if(err) {
             debug(err);
-          } else if(results) {
-            console.log(results);
-            if(descriptor) {
-              // Save Descriptor
-              model.saveService(descriptor).then((service) => {
-                debug(`Saved Service Descriptor in registry for ${service.id}`);
-              }).error((err) => {
-                debug('Error registering service');
-                console.log(error);
-              });
-            }
+          } else {
+            // Save Descriptor
+            model.saveService(descriptor).then((service) => {
+              debug(`Saved Service Descriptor in registry for ${service.id}`);
+            }).error((err) => {
+              debug('Error registering service');
+              debug(error);
+            });
 
             // Find services by types..
             model.findServicesByTypes(query.types).then((services) => {
-              console.log(services);
+              debug(services);
               services.forEach((service) => {
                 debug(service);
-                console.log(service);
                 socket.emit('service.init', service);
               });
             });

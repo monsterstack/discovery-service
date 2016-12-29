@@ -35,6 +35,7 @@ module.exports = class Health {
   docsAreGoodFx(service) {
     return (callback) => {
       // Need to check docs for existence
+      console.log("******** Docs are good *******");
       callback(null);
     }
   }

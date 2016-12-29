@@ -1,6 +1,9 @@
 'use strict';
 
 const glob = require('glob');
+const proxy = require('discovery-proxy');
+
+const uuid = require('node-uuid');
 
 /**
  * Discovery Service is Responsible for pushing changes to
@@ -17,6 +20,24 @@ const main = () => {
   const Health = require('./libs/health.js');
   const HEALTH_CHECK_INTERVAL = config.healthCheck.interval;
   const RESPONSE_TIME_METRIC_KEY = "response_time";
+
+
+  const me = () => {
+    let descriptor = {
+      endpoint: 'http://google.com',
+      type: 'DiscoveryService',
+      healthCheckRoute: '/',
+      schemaRoute: '/schema',
+      timestamp: new Date(),
+      id: uuid.v1(),
+      region: 'us-east-1',
+      stage: 'dev',
+      status: 'Online',
+      version: '2.0'
+    };
+
+    return descriptor;
+  }
 
   console.log(`Starting Discovery Service on ${config.port}`);
   let app = require('express')();
@@ -58,6 +79,12 @@ const main = () => {
 
   http.listen(config.port, () => {
     console.log(`listening on *:${config.port}`);
+  });
+
+  // Dispatch Proxy -- init / announce
+  proxy.connect({addr:'http://127.0.0.1:7616'}, (p) => {
+    console.log("************** CONNECTED *************");
+    p.bind({ descriptor: me(), types: ['FooService'] });
   });
 
   io.on('connection', (socket) => {

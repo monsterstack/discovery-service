@@ -15,10 +15,10 @@ class DiscoveryClient {
     this.socket.on('disconnect', handler);
   }
 
-  query(types, resultHandler) {
-    console.log(`Performing query for types ${types}`)
+  query(me, types, resultHandler) {
+    console.log(`Performing query for types ${types}`);
     console.log('Init');
-    this.socket.emit('services:init', { types: types });
+    this.socket.emit('services:init', { descriptor: me, types: types });
     console.log('Subscribe');
     this.socket.emit('services:subscribe', { types: types });
 

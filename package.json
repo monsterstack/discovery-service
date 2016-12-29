@@ -15,13 +15,15 @@
     "connect": "2.x",
     "debug": "^2.5.1",
     "discovery-model": "https://github.com/zacharyrote/discovery-model#development",
+    "discovery-proxy": "https://github.com/zacharyrote/discovery-proxy#development",
     "express": "^4.14.0",
     "glob": "^7.1.1",
     "http-status": "^0.2.3",
     "needle": "^1.4.3",
+    "node-uuid": "^1.4.7",
+    "request": "^2.79.0",
     "sha1": "^1.1.1",
     "socket.io": "^1.7.2",
-    "socket.io-client": "^1.7.2",
-    "request": "^2.79.0"
+    "socket.io-client": "^1.7.2"
   }
 }

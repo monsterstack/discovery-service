@@ -15,12 +15,13 @@ module.exports = class Health {
     let self = this;
     return (callback) => {
       // checkService and callback(err) if failed
-      self.checkService(service).then((result) => {
-        console.log("No error");
-        callback(null);
-      }).catch((error) => {
-        callback(error);
-      });
+      // self.checkService(service).then((result) => {
+      //   console.log("No error");
+      //   callback(null);
+      // }).catch((error) => {
+      //   callback(error);
+      // });
+      callback(null);
     }
   }
 

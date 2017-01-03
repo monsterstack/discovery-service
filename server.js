@@ -4,6 +4,8 @@ const glob = require('glob');
 const Promise = require('promise');
 const uuid = require('node-uuid');
 
+const optimist = require('optimist');
+
 
 /**
  * Discovery Service is Responsible for pushing changes to
@@ -12,28 +14,57 @@ const uuid = require('node-uuid');
  * Discovery Service also provides a Rest API to request said ServiceDescriptor(s) on demand.
  */
 const main = () => {
-  const config = require('config');
-  const proxy = require('discovery-proxy');
-  const async = require('async');
-  const sha1 = require('sha1');
-  const debug = require('debug')('discovery-service');
-  const model = require('discovery-model').model;
-  const Health = require('./libs/health.js');
-  const HEALTH_CHECK_INTERVAL = config.healthCheck.interval;
-  const RESPONSE_TIME_METRIC_KEY = "response_time";
+  let config = require('config');
+  let proxy = require('discovery-proxy');
+  let async = require('async');
+  let sha1 = require('sha1');
+  let debug = require('debug')('discovery-service');
+  let model = require('discovery-model').model;
+  let Health = require('./libs/health.js');
+  let HEALTH_CHECK_INTERVAL = config.healthCheck.interval;
+  let RESPONSE_TIME_METRIC_KEY = "response_time";
 
-  const startup = require('./libs/startup.js');
+  let startup = require('./libs/startup.js');
 
-  const NAME = 'DiscoveryService';
-  const REGION = 'us-east-1';
-  const STAGE = 'dev';
-  const VERSION = 'v1';
-  const ID = uuid.v1();
+  let NAME = 'DiscoveryService';
+  let REGION = 'us-east-1';
+  let STAGE = 'dev';
+  let VERSION = 'v1';
+  let ID = uuid.v1();
+
+  let announce = false;
+
+  if(optimist.argv.randomWorkerPort === 'true') {
+    config.port = 0;
+  }
+
+  if(optimist.argv.announce === 'true') {
+    announce = true;
+  }
+
+  /**
+   * Need to bind to `exit` so we can remove DiscoveryService from registry
+   */
+  let bindCleanUp = () => {
+    process.stdin.resume();//so the program will not close instantly
+
+    // Exit handler
+    let exitHandler = startup.exitHandlerFactory(ID, model);
+
+    //do something when app is closing
+    process.on('exit', exitHandler.bind(null,{cleanup:true}));
+
+    //catches ctrl+c event
+    process.on('SIGINT', exitHandler.bind(null, {cleanup:true}));
+
+    //catches uncaught exceptions
+    process.on('uncaughtException', exitHandler.bind(null, {cleanup:true}));
+  };
 
   /**
    * Construct my announcement
    */
-  const getMe = () => {
+  let getMe = () => {
     let descriptor = {
       type: 'DiscoveryService',
       healthCheckRoute: '/health',
@@ -49,7 +80,7 @@ const main = () => {
     let p = new Promise((resolve, reject) => {
       let ip = require('ip');
       console.log(ip.address());
-      descriptor.endpoint = "http://"+ip.address()+":"+config.port+"/api/v1"
+      descriptor.endpoint = "http://"+ip.address()+":"+config.port
       resolve(descriptor);
     });
     return p;
@@ -72,17 +103,21 @@ const main = () => {
   let subscribers = {};
   let feeds = {};
 
-  // Dispatch Proxy -- init / announce
-  getMe().then((me) => {
-    console.log(me);
-    proxy.connect({addr:'http://127.0.0.1:7616'}, (p) => {
-      p.bind({ descriptor: me, types: [] });
+  /* Handle exit -- Only if announcing descriptor to self */
+  if(announce === 'true')
+    bindCleanUp();
+
+  if(announce === true) {
+    // Dispatch Proxy -- init / announce
+    getMe().then((me) => {
+      console.log(me);
+      proxy.connect({addr:'http://0.0.0.0:7616'}, (p) => {
+        p.bind({ descriptor: me, types: [] });
+      });
+    }).catch((err) => {
+      console.log(err);
     });
-  }).catch((err) => {
-    console.log(err);
-  });
-
-
+  }
 
   /** Health Check Schedule **/
   startup.scheduleHealthCheck(model, HEALTH_CHECK_INTERVAL);
@@ -170,13 +205,15 @@ const main = () => {
       socket.on('disconnect', (event) => {
         debug('Disconnect Event');
         debug(event);
-        subscribers[key].splice(socket);
+        if(subscribers[key]) {
+          subscribers[key].splice(socket);
 
-        /** Clean it up 'bish' **/
-        if(subscribers[key].length === 0) {
-          //feeds[key].closeFeed();
-          delete feeds[key];
-          delete subscribers[key];
+          /** Clean it up 'bish' **/
+          if(subscribers[key].length === 0) {
+            //feeds[key].closeFeed();
+            delete feeds[key];
+            delete subscribers[key];
+          }
         }
       }); // close on-disconnect
 
@@ -246,6 +283,14 @@ const main = () => {
       }
     }); // -- close on-services.init
   }); // -- close on-connection
+
+
+  process.on('message', function(msg, socket) {
+        if (msg !== 'sticky-session:connection') return;
+        // Emulate a connection event on the server by emitting the
+        // event with the connection the master sent us.
+        http.emit('connection', socket);
+    });
 }
 
 /* Method main - Ha */

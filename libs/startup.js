@@ -36,6 +36,28 @@ const createValidationPipeline = (descriptor) => {
   ]
 }
 
+// Exit handler
+const createErrorHandler = (serviceId, model) => {
+  return function(options, err) {
+    if (options.cleanup) {
+      console.log('clean');
+      model.deleteService({id:serviceId}).then((service) => {
+        console.log(`Cleaned up Service ${service.id}`);
+        setTimeout(() => {
+          process.exit();
+        }, 500);
+      })
+    }
+
+    if (err) {
+      console.log(err.stack);
+      process.exit();
+    }
+  }
+}
+
+
 exports.scheduleHealthCheck = scheduleHealthCheck;
 exports.loadHttpRoutes = loadHttpRoutes;
 exports.createValidationPipeline = createValidationPipeline;
+exports.exitHandlerFactory = createErrorHandler;

@@ -117,10 +117,12 @@ const main = () => {
     }).catch((err) => {
       console.log(err);
     });
-  }
 
-  /** Health Check Schedule **/
-  startup.scheduleHealthCheck(model, HEALTH_CHECK_INTERVAL);
+    /** Health Check Schedule **/
+    startup.scheduleHealthCheck(model, () => {
+      return true;
+    }, HEALTH_CHECK_INTERVAL);
+  }
 
   /* Http Routes */
   startup.loadHttpRoutes(app, proxy);

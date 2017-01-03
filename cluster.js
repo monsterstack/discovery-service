@@ -85,6 +85,9 @@ const main = () => {
   let model = require('discovery-model').model;
   let numCPUs = numWorkers || require('os').cpus().length;
 
+  let healthCheckInterval = config.healthCheck.interval;
+  let iAmMaster = false;
+
   let exitHandler = startup.exitHandlerFactory(ID, model);
   bindExitHandler(exitHandler);
 
@@ -137,16 +140,25 @@ const main = () => {
         }, 500);
       });
 
+      /** Health Check Schedule **/
+      let masterCheck = () => {
+        return iAmMaster;
+      };
+
+      startup.scheduleHealthCheck(model, masterCheck, healthCheckInterval);
+
 
       /** Deal with Election of Group Leader **/
       let leader = new Leader();
       leader.onStepUp((groupName) => {
         console.log("******************* I am master");
         console.log(groupName);
+        iAmMaster = true;
       });
 
       leader.onStepDown((groupName) => {
         console.log(groupName);
+        iAmMaster = false;
       });
 
       leader.join('DiscoveryService-Cluster');

@@ -4,19 +4,21 @@ const glob = require('glob');
 const appRoot = require('app-root-path');
 const Health = require('./health.js');
 
-const scheduleHealthCheck = (model, interval) => {
+const scheduleHealthCheck = (model, masterCheck, interval) => {
   setInterval(() => {
-    debug('health check');
-    model.allServices().then((services) => {
-      services.forEach((service) => {
-        let health = new Health();
-        health.check(service, true).then((response) => {
-          debug(response);
-        }).catch((err) => {
-          console.log(err);
+    if(masterCheck()) {
+      debug('health check');
+      model.allServices().then((services) => {
+        services.forEach((service) => {
+          let health = new Health();
+          health.check(service, true).then((response) => {
+            debug(response);
+          }).catch((err) => {
+            console.log(err);
+          });
         });
       });
-    });
+    }
   }, interval);
 }
 

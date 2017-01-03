@@ -14,7 +14,7 @@ const ID = uuid.v1();
 const startup = require('./libs/startup');
 
 const overrideLocation = null;
-const numWorkers = null;
+
 
 /**
  * Construct my announcement
@@ -59,6 +59,8 @@ const bindExitHandler = (exitHandler) => {
  * Method Main - Ha
  */
 const main = () => {
+  let numWorkers = null;
+
   if(optimist.argv.override) {
     overrideLocation = optimist.argv.override;
   }
@@ -77,9 +79,8 @@ const main = () => {
     silent: false
   });
 
-
   let config = require('config');
-
+  let Leader = require('./libs/leader');
   let proxy = require('discovery-proxy');
   let model = require('discovery-model').model;
   let numCPUs = numWorkers || require('os').cpus().length;
@@ -102,8 +103,6 @@ const main = () => {
           }(i);
       }
 
-      let seed = ~~(Math.random() * 1e9);
-
       cluster.on('listening', (worker, address) => {
           console.log('A worker is now connected to ' + address.address + ':' + address.port);
       });
@@ -113,6 +112,7 @@ const main = () => {
       });
 
       let server = net.createServer({ pauseOnConnect: true }, (c) => {
+          let seed = ~~(Math.random() * 1e9);
           // Get int31 hash of ip
           let worker,
               ipIndex = hash((c.remoteAddress || '').split(/\./g), seed);
@@ -136,6 +136,20 @@ const main = () => {
           });
         }, 500);
       });
+
+
+      /** Deal with Election of Group Leader **/
+      let leader = new Leader();
+      leader.onStepUp((groupName) => {
+        console.log("******************* I am master");
+        console.log(groupName);
+      });
+
+      leader.onStepDown((groupName) => {
+        console.log(groupName);
+      });
+
+      leader.join('DiscoveryService-Cluster');
     }
 }
 

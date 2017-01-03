@@ -13,6 +13,7 @@
     "async": "^2.1.4",
     "babel-cli": "^6.18.0",
     "babel-preset-node6": "^11.0.0",
+    "bronto": "^0.1.0",
     "coffee-script": "^1.12.2",
     "config": "^1.24.0",
     "connect": "2.x",
@@ -31,6 +32,7 @@
     "request": "^2.79.0",
     "sha1": "^1.1.1",
     "socket.io": "^1.7.2",
-    "socket.io-client": "^1.7.2"
+    "socket.io-client": "^1.7.2",
+    "winston": "^2.3.0"
   }
 }

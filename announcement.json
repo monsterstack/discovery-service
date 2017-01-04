@@ -1,0 +1,6 @@
+{
+  "name": "DiscoveryService",
+  "region": "us-east-1",
+  "stage": "dev",
+  "version": "v1"
+}

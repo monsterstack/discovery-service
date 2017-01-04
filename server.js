@@ -6,6 +6,7 @@ const uuid = require('node-uuid');
 
 const optimist = require('optimist');
 
+const RESPONSE_TIME_METRIC_KEY = "response_time";
 
 /**
  * Discovery Service is Responsible for pushing changes to
@@ -21,16 +22,15 @@ const main = () => {
   let debug = require('debug')('discovery-service');
   let model = require('discovery-model').model;
   let Health = require('./libs/health.js');
-  let HEALTH_CHECK_INTERVAL = config.healthCheck.interval;
-  let RESPONSE_TIME_METRIC_KEY = "response_time";
+  let healthCheckInterval = config.healthCheck.interval;
+
 
   let startup = require('./libs/startup.js');
 
-  let NAME = 'DiscoveryService';
-  let REGION = 'us-east-1';
-  let STAGE = 'dev';
-  let VERSION = 'v1';
-  let ID = uuid.v1();
+  let id = uuid.v1();
+
+  let announcement = require('./announcement.json');
+  announcement.id = id;
 
   let announce = false;
 
@@ -42,6 +42,14 @@ const main = () => {
     announce = true;
   }
 
+  if(optimist.argv.region) {
+    announcement.region = optimist.argv.region;
+  }
+
+  if(optimist.argv.stage) {
+    announcement.stage = optimist.argv.stage;
+  }
+
   /**
    * Need to bind to `exit` so we can remove DiscoveryService from registry
    */
@@ -49,7 +57,7 @@ const main = () => {
     process.stdin.resume();//so the program will not close instantly
 
     // Exit handler
-    let exitHandler = startup.exitHandlerFactory(ID, model);
+    let exitHandler = startup.exitHandlerFactory(id, model);
 
     //do something when app is closing
     process.on('exit', exitHandler.bind(null,{cleanup:true}));
@@ -70,11 +78,11 @@ const main = () => {
       healthCheckRoute: '/health',
       schemaRoute: '/swagger.json',
       timestamp: new Date(),
-      id: ID,
-      region: REGION,
-      stage: STAGE,
+      id: id,
+      region: region,
+      stage: stage,
       status: 'Online',
-      version: VERSION
+      version: version
     };
 
     let p = new Promise((resolve, reject) => {
@@ -90,6 +98,12 @@ const main = () => {
   let app = require('express')();
   let http = require('http').Server(app);
   let io = require('socket.io')(http);
+  let ioredis = require('socket.io-redis');
+
+  io.adapter(ioredis({
+    host: 'localhost',
+    port: 6379
+  }));
 
   /*
    * Clients interested in discovery
@@ -121,7 +135,7 @@ const main = () => {
     /** Health Check Schedule **/
     startup.scheduleHealthCheck(model, () => {
       return true;
-    }, HEALTH_CHECK_INTERVAL);
+    }, healthCheckInterval);
   }
 
   /* Http Routes */
@@ -152,6 +166,20 @@ const main = () => {
             } else {
               service.rtimes.push(value);
             }
+
+            // Compute avg
+            let total = 0;
+            let avg = 0;
+            service.rtimes.forEach((time) => {
+              total += time;
+              avg = total/(rtimes.length);
+            });
+
+            service.avgTime = avg;
+
+            model.updateService(service).then((updated) => {
+              debug(`Updated service ${service.id}`);
+            });
           }
         }).error((err) => {
           console.log("Failed to find related service...");

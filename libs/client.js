@@ -43,7 +43,10 @@ const connect = (options, callback) => {
     socket.on('connect', () => {
       socket.emit('authentication', {});
       socket.on('authenticated', () => {
-        callback(new DiscoveryClient(socket));
+        callback(null, new DiscoveryClient(socket));
+      });
+      socket.on('unauthorized', (err) => {
+        callback(err);
       });
     });
 }

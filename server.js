@@ -5,6 +5,7 @@ const Promise = require('promise');
 const uuid = require('node-uuid');
 
 const optimist = require('optimist');
+const authSetup = require('socketio-auth');
 
 const RESPONSE_TIME_METRIC_KEY = "response_time";
 
@@ -105,6 +106,12 @@ const main = () => {
     port: 6379
   }));
 
+  authSetup(io, {
+    authenticate: (socket, data, callback) => {
+        callback(null, true);
+    }
+  });
+
   /*
    * Clients interested in discovery
    * Here we want to map the query to an array of clients performing
@@ -145,6 +152,7 @@ const main = () => {
     console.log(`listening on *:${config.port}`);
   });
 
+  // https://www.npmjs.com/package/socketio-auth
   io.on('connection', (socket) => {
 
     /**
@@ -170,10 +178,10 @@ const main = () => {
             // Compute avg
             let total = 0;
             let avg = 0;
-            service.rtimes.forEach((time) => {
-              total += time;
-              avg = total/(rtimes.length);
-            });
+            for(let i in service.rtimes) {
+              total += service.rtimes[i];
+              avg = total/(service.rtimes.length);
+            }
 
             service.avgTime = avg;
 

@@ -41,7 +41,10 @@ const connect = (options, callback) => {
     let socket = socketIOClient(options.addr || 'http://localhost:7616');
 
     socket.on('connect', () => {
-      callback(new DiscoveryClient(socket));
+      socket.emit('authentication', {});
+      socket.on('authenticated', () => {
+        callback(new DiscoveryClient(socket));
+      });
     });
 }
 

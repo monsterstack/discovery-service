@@ -34,6 +34,7 @@
     "socket.io": "^1.7.2",
     "socket.io-client": "^1.7.2",
     "socket.io-redis": "^2.0.1",
+    "socketio-auth": "^0.1.0",
     "winston": "^2.3.0"
   }
 }

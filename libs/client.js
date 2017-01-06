@@ -39,11 +39,12 @@ class DiscoveryClient {
 
 const connect = (options, callback) => {
     let socket = socketIOClient(options.addr || 'http://localhost:7616');
-
+    let client = null;
     socket.on('connect', () => {
       socket.emit('authentication', {});
       socket.on('authenticated', () => {
-        let client = new DiscoveryClient(socket);
+        if(client === null)
+          client = new DiscoveryClient(socket);
         callback(null, client);
       });
       socket.on('unauthorized', (err) => {

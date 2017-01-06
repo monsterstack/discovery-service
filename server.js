@@ -74,16 +74,17 @@ const main = () => {
    * Construct my announcement
    */
   let getMe = () => {
+    let announce = require('./announcement.json');
     let descriptor = {
       type: 'DiscoveryService',
       healthCheckRoute: '/health',
       schemaRoute: '/swagger.json',
       timestamp: new Date(),
       id: id,
-      region: region,
-      stage: stage,
+      region: announce.region,
+      stage: announce.stage,
       status: 'Online',
-      version: version
+      version: announce.version
     };
 
     let p = new Promise((resolve, reject) => {
@@ -101,10 +102,10 @@ const main = () => {
   let io = require('socket.io')(http);
   let ioredis = require('socket.io-redis');
 
-  io.adapter(ioredis({
-    host: 'localhost',
-    port: 6379
-  }));
+  // io.adapter(ioredis({
+  //   host: 'localhost',
+  //   port: 6379
+  // }));
 
   authSetup(io, {
     authenticate: (socket, data, callback) => {
@@ -132,7 +133,7 @@ const main = () => {
     // Dispatch Proxy -- init / announce
     getMe().then((me) => {
       console.log(me);
-      proxy.connect({addr:'http://0.0.0.0:7616'}, (p) => {
+      proxy.connect({addr:'http://0.0.0.0:7616'}, (err, p) => {
         p.bind({ descriptor: me, types: [] });
       });
     }).catch((err) => {
@@ -246,10 +247,10 @@ const main = () => {
         debug(key);
         if(subscribers[key]) {
           subscribers[key].splice(socket);
-          console.log(feeds);
           /** Clean it up 'bish' **/
           if(subscribers[key].length === 0) {
-            console.log(feeds[key]);
+            // console.log(feeds[key]);
+            // feeds[key].closeFeed();
             delete feeds[key];
             delete subscribers[key];
           }
@@ -305,12 +306,11 @@ const main = () => {
           } else {
             // Save Descriptor
             model.saveService(descriptor).then((service) => {
-              debug(`Saved Service Descriptor in registry for ${service.id}`);
+              debug(`Updated Service Descriptor in registry for ${service.id}`);
             }).error((err) => {
               debug('Error registering service');
-              debug(error);
+              debug(err);
             });
-
             // Find services by types..
             model.findServicesByTypes(query.types).then((services) => {
               debug(services);

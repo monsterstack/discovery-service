@@ -130,8 +130,12 @@ const main = () => {
           //Dispatch Proxy -- init / announce
           getMe(config).then((me) => {
             console.log(me);
-            proxy.connect({addr:'http://0.0.0.0:'+config.port}, (p) => {
-              p.bind({ descriptor: me, types: [] });
+            proxy.connect({addr:'http://0.0.0.0:'+config.port}, (err, p) => {
+              if(err) {
+                console.log(err);
+              } else {
+                p.bind({ descriptor: me, types: [] });
+              }
             });
           }).catch((err) => {
             console.log("******************** Error **********")

@@ -243,15 +243,18 @@ const main = () => {
       socket.on('disconnect', (event) => {
         debug('Disconnect Event');
         debug(event);
+        debug(key);
         if(subscribers[key]) {
           subscribers[key].splice(socket);
-
+          console.log(feeds);
           /** Clean it up 'bish' **/
           if(subscribers[key].length === 0) {
-            //feeds[key].closeFeed();
+            console.log(feeds[key]);
             delete feeds[key];
             delete subscribers[key];
           }
+        } else {
+          debug("WARN - MISSING KEY ....... DELETE FAILED");
         }
       }); // close on-disconnect
 
@@ -269,14 +272,12 @@ const main = () => {
           /* Start Query --
             * Need some handle on this so we can kill the query when all interested parties disconnect
             */
-          model.onServiceChange(query.types, (err, change) => {
+          let myFeed = model.onServiceChange(query.types, (err, change) => {
             let keys = Object.keys(subscribers);
             keys.forEach((key) => {
+              console.log(key);
               let clients = subscribers[key];
-              // Falsey check
-              if(!feeds[key]) {
-                feeds[key] = change.record;
-              }
+
               clients.forEach((client) => {
                 client.emit('service.added', change.change);
                 client.emit('service.removed', change.change);
@@ -284,6 +285,8 @@ const main = () => {
               });
             });
           });
+
+          feeds[key] = myFeed;
         }
       }
     }); // -- close on-services:subscribe

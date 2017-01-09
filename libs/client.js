@@ -46,19 +46,15 @@ const connect = (options, callback) => {
     let socket = socketIOClient(options.addr || 'http://localhost:7616');
     let client = null;
     socket.on('connect', (conn) => {
-      if(client === null) {
-        socket.emit('authentication', {});
-        socket.on('authenticated', () => {
-          if(client === null)
-            client = new DiscoveryClient(socket);
-          callback(null, client);
-        });
-        socket.on('unauthorized', (err) => {
-          callback(err);
-        });
-      } else {
+      socket.emit('authentication', {});
+      socket.on('authenticated', () => {
+        if(client === null)
+          client = new DiscoveryClient(socket);
         callback(null, client);
-      }
+      });
+      socket.on('unauthorized', (err) => {
+        callback(err);
+      });
     });
 }
 

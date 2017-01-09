@@ -26,6 +26,11 @@ class DiscoveryClient {
     if(resultHandler) {
       handler = resultHandler;
       console.log("Listening for changes");
+      this.socket.removeListener('service.added', handler.added);
+      this.socket.removeListener('service.removed', handler.removed);
+      this.socket.removeListener('service.updated', handler.updated);
+      this.socket.removeListener('service.init', handler.init);
+      // Setup
       this.socket.on('service.added', handler.added);
       this.socket.on('service.removed', handler.removed);
       this.socket.on('service.updated', handler.updated);
@@ -40,16 +45,18 @@ class DiscoveryClient {
 const connect = (options, callback) => {
     let socket = socketIOClient(options.addr || 'http://localhost:7616');
     let client = null;
-    socket.on('connect', () => {
-      socket.emit('authentication', {});
-      socket.on('authenticated', () => {
-        if(client === null)
-          client = new DiscoveryClient(socket);
-        callback(null, client);
-      });
-      socket.on('unauthorized', (err) => {
-        callback(err);
-      });
+    socket.on('connect', (conn) => {
+      if(client === null) {
+        socket.emit('authentication', {});
+        socket.on('authenticated', () => {
+          if(client === null)
+            client = new DiscoveryClient(socket);
+          callback(null, client);
+        });
+        socket.on('unauthorized', (err) => {
+          callback(err);
+        });
+      }
     });
 }
 

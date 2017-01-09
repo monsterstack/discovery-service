@@ -125,6 +125,10 @@ const main = () => {
   let subscribers = {};
   let feeds = {};
 
+  setInterval(() => {
+    console.log(Object.keys(feeds));
+  }, 30000);
+
   /* Handle exit -- Only if announcing descriptor to self */
   if(announce === 'true')
     bindCleanUp();
@@ -144,6 +148,8 @@ const main = () => {
     startup.scheduleHealthCheck(model, () => {
       return true;
     }, healthCheckInterval);
+
+
   }
 
   /* Http Routes */

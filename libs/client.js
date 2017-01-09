@@ -56,6 +56,8 @@ const connect = (options, callback) => {
         socket.on('unauthorized', (err) => {
           callback(err);
         });
+      } else {
+        callback(null, client);
       }
     });
 }

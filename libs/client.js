@@ -42,13 +42,12 @@ class DiscoveryClient {
   }
 }
 
-let socket = null;
+const socket = null;
 
 const connect = (options, callback) => {
     if(socket === null) {
       socket = socketIOClient(options.addr || 'http://localhost:7616');
       console.log(`Created socket`);
-      console.log(socket);
     }
 
     let client = null;

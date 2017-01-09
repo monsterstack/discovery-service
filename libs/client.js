@@ -42,8 +42,12 @@ class DiscoveryClient {
   }
 }
 
+let socket = null;
+
 const connect = (options, callback) => {
-    let socket = socketIOClient(options.addr || 'http://localhost:7616');
+    if(socket === null)
+      socket = socketIOClient(options.addr || 'http://localhost:7616');
+
     let client = null;
     socket.on('connect', (conn) => {
       socket.emit('authentication', {});

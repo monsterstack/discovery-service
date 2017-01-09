@@ -47,9 +47,10 @@ let socket = null;
 const connect = (options, callback) => {
     if(socket === null) {
       socket = socketIOClient(options.addr || 'http://localhost:7616');
-      console.log(`Created socket ${socket.id}`);
+      console.log(`Created socket`);
+      console.log(socket);
     }
-    
+
     let client = null;
     socket.on('connect', (conn) => {
       socket.emit('authentication', {});

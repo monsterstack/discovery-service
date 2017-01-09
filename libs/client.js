@@ -46,18 +46,16 @@ var socket = null;
 
 const connect = (options, callback) => {
     let host = options.addr || 'http://localhost:7616';
-
+    let client = null;
     if(socket === null) {
       socket = socketIOClient(host);
       console.log(`Created socket`);
+      client = new DiscoveryClient(socket);
     }
 
-    let client = null;
     socket.on('connect', (conn) => {
       socket.emit('authentication', {});
       socket.on('authenticated', () => {
-        if(client === null)
-          client = new DiscoveryClient(socket);
         callback(null, client);
       });
       socket.on('unauthorized', (err) => {

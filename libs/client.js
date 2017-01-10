@@ -48,6 +48,10 @@ const connect = (options, callback) => {
     let socket = socketIOClient(host);
     let client = new DiscoveryClient(socket);
 
+    client.onDisconnect(() => {
+      console.log('Bye Bye Connection');
+    });
+
     socket.on('connect', (conn) => {
       // socket.emit('authentication', {});
       // socket.on('authenticated', () => {

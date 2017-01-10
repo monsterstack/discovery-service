@@ -130,7 +130,7 @@ const main = () => {
   }, 30000);
 
   /* Handle exit -- Only if announcing descriptor to self */
-  if(announce === 'true')
+  if(announce === true)
     bindCleanUp();
 
   if(announce === true) {
@@ -284,11 +284,15 @@ const main = () => {
             keys.forEach((key) => {
               console.log(key);
               let clients = subscribers[key];
-
+              console.log(`Client count ${clients.length}`);
               clients.forEach((client) => {
-                client.emit('service.added', change.change);
-                client.emit('service.removed', change.change);
-                client.emit('service.updated', change.change);
+                if(change.isNew === true) {
+                  client.emit('service.added', change.change);
+                } else if(change.deleted === true) {
+                  client.emit('service.removed', change.change);
+                } else {
+                  client.emit('service.updated', change.change);
+                }
               });
             });
           });
@@ -319,13 +323,22 @@ const main = () => {
             });
             // Find services by types..
             model.findServicesByTypes(query.types).then((services) => {
-              debug(services);
               services.forEach((service) => {
                 debug(service);
                 socket.emit('service.init', service);
               });
             });
           }
+        });
+      } else {
+        // No Descriptor so just init the query types.
+        // Find services by types..
+        model.findServicesByTypes(query.types).then((services) => {
+          debug(services);
+          services.forEach((service) => {
+            debug(service);
+            socket.emit('service.init', service);
+          });
         });
       }
     }); // -- close on-services.init

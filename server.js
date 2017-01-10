@@ -107,11 +107,11 @@ const main = () => {
   //   port: 6379
   // }));
 
-  authSetup(io, {
-    authenticate: (socket, data, callback) => {
-        callback(null, true);
-    }
-  });
+  // authSetup(io, {
+  //   authenticate: (socket, data, callback) => {
+  //       callback(null, true);
+  //   }
+  // });
 
   /*
    * Clients interested in discovery

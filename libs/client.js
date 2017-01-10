@@ -15,7 +15,17 @@ class DiscoveryClient {
     this.socket.on('disconnect', handler);
   }
 
+  clearHandlers() {
+    if(this.queryHandler) {
+      this.socket.removeListener('service.added', this.queryHandler.added);
+      this.socket.removeListener('service.removed', this.queryHandler.removed);
+      this.socket.removeListener('service.updated', this.queryHandler.updated);
+      this.socket.removeListener('service.init', this.queryHandler.init);
+    }
+  }
+
   query(me, types, resultHandler) {
+    this.queryHandler = resultHandler;
     console.log(`Performing query for types ${types}`);
     console.log('Init');
     this.socket.emit('services:init', { descriptor: me, types: types });
@@ -26,6 +36,7 @@ class DiscoveryClient {
     if(resultHandler) {
       handler = resultHandler;
       console.log("Cleanup handlers");
+      console.log(this.socket.$events);
       if(this.socket.$events) {
         if(this.socket.$events.hasOwnProperty('service.added')){
           delete this.socket.$events['service.added'];
@@ -61,6 +72,7 @@ const connect = (options, callback) => {
 
     client.onDisconnect(() => {
       console.log('Bye Bye Connection');
+      client.clearHandlers();
     });
 
     socket.on('connect', (conn) => {

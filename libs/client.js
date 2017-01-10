@@ -22,18 +22,10 @@ class DiscoveryClient {
     console.log('Subscribe');
     this.socket.emit('services:subscribe', { types: types });
 
-
-    if(this.queryHandler === null) {
-      this.queryHandler = resultHandler;
-    }
-
-    if(this.queryHandler) {
-      handler = this.queryHandler;
+    let handler;
+    if(resultHandler) {
+      handler = resultHandler;
       console.log("Listening for changes");
-      this.socket.removeListener('service.added', handler.added);
-      this.socket.removeListener('service.removed', handler.removed);
-      this.socket.removeListener('service.updated', handler.updated);
-      this.socket.removeListener('service.init', handler.init);
       // Setup
       this.socket.on('service.added', handler.added);
       this.socket.on('service.removed', handler.removed);

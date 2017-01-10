@@ -54,13 +54,14 @@ const connect = (options, callback) => {
     }
 
     socket.on('connect', (conn) => {
-      socket.emit('authentication', {});
-      socket.on('authenticated', () => {
-        callback(null, client);
-      });
-      socket.on('unauthorized', (err) => {
-        callback(err);
-      });
+      // socket.emit('authentication', {});
+      // socket.on('authenticated', () => {
+      //   callback(null, client);
+      // });
+      // socket.on('unauthorized', (err) => {
+      //   callback(err);
+      // });
+      callback(null, client);
     });
 }
 

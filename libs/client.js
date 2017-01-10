@@ -26,17 +26,19 @@ class DiscoveryClient {
     if(resultHandler) {
       handler = resultHandler;
       console.log("Cleanup handlers");
-      if(this.socket.$events.hasOwnProperty('service.added')){
-        delete this.socket.$events['service.added'];
-      }
-      if(this.socket.$events.hasOwnProperty('service.removed')){
-        delete this.socket.$events['service.removed'];
-      }
-      if(this.socket.$events.hasOwnProperty('service.updated')){
-        delete this.socket.$events['service.updated'];
-      }
-      if(this.socket.$events.hasOwnProperty('service.init')){
-        delete this.socket.$events['service.init'];
+      if(this.socket.$events) {
+        if(this.socket.$events.hasOwnProperty('service.added')){
+          delete this.socket.$events['service.added'];
+        }
+        if(this.socket.$events.hasOwnProperty('service.removed')){
+          delete this.socket.$events['service.removed'];
+        }
+        if(this.socket.$events.hasOwnProperty('service.updated')){
+          delete this.socket.$events['service.updated'];
+        }
+        if(this.socket.$events.hasOwnProperty('service.init')){
+          delete this.socket.$events['service.init'];
+        }
       }
       // Setup
       console.log('Listening for changes');

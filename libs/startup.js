@@ -50,7 +50,7 @@ const createValidationPipeline = (descriptor) => {
 /**
  * Create Error Handler
  */
-const createErrorHandler = (serviceId, model) => {
+const createErrorHandler = (serviceId, model, workers) => {
   return function(options, err) {
     if (options.cleanup) {
       console.log('clean');
@@ -59,7 +59,7 @@ const createErrorHandler = (serviceId, model) => {
         setTimeout(() => {
           process.exit();
         }, 500);
-      })
+      });
     }
 
     if (err) {

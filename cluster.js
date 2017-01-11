@@ -45,6 +45,7 @@ const getMe = (config) => {
  * Bind an 'exitHandler' so we can clean-up on 'exit'
  */
 const bindExitHandler = (exitHandler) => {
+  process.stdin.resume();//so the program will not close instantly
   //do something when app is closing
   process.on('exit', exitHandler.bind(null,{cleanup:true}));
 
@@ -87,12 +88,13 @@ const main = () => {
 
   let healthCheckInterval = config.healthCheck.interval;
   let iAmMaster = false;
-
+  let workers = [];
   let exitHandler = startup.exitHandlerFactory(ID, model);
-  bindExitHandler(exitHandler);
+  // Bind Exit Handler
+  bindExitHandler(exitHandler, workers);
 
   if (cluster.isMaster) {
-      let workers = [];
+
       // Fork workers. One per CPU for maximum effectiveness
       for (let i = 0; i < numCPUs; i++) {
           !function spawn(i) {
@@ -100,7 +102,9 @@ const main = () => {
 
               workers[i].on('exit', function() {
                   console.error('sticky-session: worker died');
-                  spawn(i);
+                  setTimeout(() => {
+                    spawn(i);
+                  }, 2000);
               });
 
           }(i);

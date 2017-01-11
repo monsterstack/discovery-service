@@ -252,14 +252,15 @@ const main = () => {
         debug(event);
         debug(key);
         if(subscribers[key]) {
-          console.log(socket.id);
-          console.log(subscribers[key]);
+          console.log(`Socket id ${socket.id}`);
+          console.log(`Before ${subscribers[key]}`);
           let spliced = subscribers[key].splice(subscribers[key].indexOf(socket.id), 1);
-          console.log(spliced);
+          console.log(`After ${subscribers[key]}`);
           /** Clean it up 'bish' **/
           if(subscribers[key].length === 0) {
             // console.log(feeds[key]);
             // feeds[key].closeFeed();
+
             delete feeds[key];
             delete subscribers[key];
           }
@@ -289,11 +290,16 @@ const main = () => {
               let clients = subscribers[key];
               console.log(`Client count ${clients.length}`);
               clients.forEach((client) => {
+                console.log(`Sending to client ${client}`);
+                console.log(clients);
                 if(change.isNew === true) {
+                  console.log('Sending add');
                   io.to(client).emit('service.added', change.change);
                 } else if(change.deleted === true) {
+                  console.log('Sending remove');
                   io.to(client).emit('service.removed', change.change);
                 } else {
+                  console.log('Sending update');
                   io.to(client).emit('service.updated', change.change);
                 }
               });

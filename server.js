@@ -323,7 +323,7 @@ const main = () => {
             });
             // Find services by types..
             model.findServicesByTypes(query.types).then((services) => {
-              services.forEach((service) => {
+              services.elements.forEach((service) => {
                 debug(service);
                 socket.emit('service.init', service);
               });
@@ -335,7 +335,7 @@ const main = () => {
         // Find services by types..
         model.findServicesByTypes(query.types).then((services) => {
           debug(services);
-          services.forEach((service) => {
+          services.elements.forEach((service) => {
             debug(service);
             socket.emit('service.init', service);
           });

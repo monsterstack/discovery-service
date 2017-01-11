@@ -5,12 +5,21 @@ const model = require('discovery-model').model;
 const WebHook = require('./webHook.js');
 const debug = require('debug')('discovery-health');
 
-module.exports = class Health {
+/**
+ * Health
+ * Responsible for verifying health of a service.
+ * Can be configured to report health via 'webhook' to
+ * third-party monitoring or notification tools.
+ */
+class Health {
   constructor(options) {
     if(options)
       this.badHealthWebHook = new WebHook(options.bad_health_web_hook);
   }
 
+  /**
+   * Check health of service
+   */
   healthIsGoodFx(service) {
     let self = this;
     return (callback) => {
@@ -24,6 +33,9 @@ module.exports = class Health {
     }
   }
 
+  /**
+   * Check swagger of service
+   */
   swaggerIsGoodFx(service) {
     return (callback) => {
       // Need to check swagger.json for existence and validation
@@ -31,6 +43,9 @@ module.exports = class Health {
     }
   }
 
+  /**
+   * Check documentation of service.
+   */
   docsAreGoodFx(service) {
     return (callback) => {
       // Need to check docs for existence
@@ -42,6 +57,8 @@ module.exports = class Health {
    * Check the Health of the service.
    * 1. GET healthCheckRoute and if not 200, flag offline.
    * 2. If status is already offline and healthCheckRoute fails, delete service.
+   *
+   * @TODO Look into refactoring this to make it more readable. - Too many lines
    */
   check(service, update) {
     let p = new Promise((resolve, reject) => {
@@ -124,3 +141,6 @@ module.exports = class Health {
     return p;
   }
 }
+
+// Public
+module.exports = Health;

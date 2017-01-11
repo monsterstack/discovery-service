@@ -11,10 +11,16 @@ class DiscoveryClient {
     this.socket = socket;
   }
 
+  /**
+   * Handle Disconnect
+   */
   onDisconnect(handler) {
     this.socket.on('disconnect', handler);
   }
 
+  /**
+   * Clear handlers
+   */
   clearHandlers() {
     if(this.queryHandler) {
       this.socket.removeListener('service.added', this.queryHandler.added);
@@ -24,6 +30,9 @@ class DiscoveryClient {
     }
   }
 
+  /**
+   * Query for Changes to services.
+   */
   query(me, types, resultHandler) {
     this.queryHandler = resultHandler;
     console.log(`Performing query for types ${types}`);
@@ -35,7 +44,7 @@ class DiscoveryClient {
     let handler;
     if(resultHandler) {
       handler = resultHandler;
-      
+
       // Setup
       console.log('Listening for changes');
       this.socket.on('service.added', handler.added);
@@ -49,7 +58,13 @@ class DiscoveryClient {
   }
 }
 
-
+/**
+ * Connect to Discovery Service
+ * @TODO: Need a way to deal with failover.  Perhaps we
+ * Access this service through Load Balancer.  Another option is to
+ * see if we can support multiple host addresses.
+ * Leaning towards LB for simplicity of development effort.
+ */
 const connect = (options, callback) => {
     let host = options.addr || 'http://localhost:7616';
     let socket = socketIOClient(host);
@@ -72,4 +87,5 @@ const connect = (options, callback) => {
     });
 }
 
+// Public
 module.exports.connect = connect;

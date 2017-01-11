@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * Create a Hash based on ip address and seed.
+ * @TODO: Move to Common Libs
+ */
 const hash = (ip, seed) => {
   let h = ip.reduce((r, num) => {
         r += parseInt(num, 10);
@@ -19,4 +23,5 @@ const hash = (ip, seed) => {
     return h >>> 0;
 }
 
+// Public
 module.exports = hash;

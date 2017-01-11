@@ -1,8 +1,12 @@
+'use strict';
 const needle = require('needle');
 const debug = require('debug')('discovery-web-hook');
 const Promise = require('Promise');
 
-module.exports = class WebHook {
+/**
+ * WebHook
+ */
+class WebHook {
   constructor(options) {
     this.url = options.url;
   }
@@ -28,3 +32,6 @@ module.exports = class WebHook {
     return `<b>title</b><br/><span>Service name: ${data.endpoint}&nbsp;Status: ${data.status}</span>`
   }
 }
+
+// Public
+module.exports = WebHook;

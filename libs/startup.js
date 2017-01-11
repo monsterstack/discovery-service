@@ -4,12 +4,15 @@ const glob = require('glob');
 const appRoot = require('app-root-path');
 const Health = require('./health.js');
 
+/**
+ * Schedule Health Check
+ */
 const scheduleHealthCheck = (model, masterCheck, interval) => {
   setInterval(() => {
     if(masterCheck()) {
       debug('health check');
       model.allServices().then((services) => {
-        services.forEach((service) => {
+        services.elements.forEach((service) => {
           let health = new Health();
           health.check(service, true).then((response) => {
             debug(response);
@@ -22,6 +25,9 @@ const scheduleHealthCheck = (model, masterCheck, interval) => {
   }, interval);
 }
 
+/**
+ * Load Http Routes
+ */
 const loadHttpRoutes = (app, proxy) => {
   glob(appRoot.path + "/api/v1/routes/*.routes.js", {}, (err, files) => {
     files.forEach((file) => {
@@ -30,6 +36,9 @@ const loadHttpRoutes = (app, proxy) => {
   });
 }
 
+/**
+ * Create Validation Pipeline
+ */
 const createValidationPipeline = (descriptor) => {
   return [
     new Health().swaggerIsGoodFx(descriptor),
@@ -38,7 +47,9 @@ const createValidationPipeline = (descriptor) => {
   ]
 }
 
-// Exit handler
+/**
+ * Create Error Handler
+ */
 const createErrorHandler = (serviceId, model) => {
   return function(options, err) {
     if (options.cleanup) {
@@ -58,7 +69,7 @@ const createErrorHandler = (serviceId, model) => {
   }
 }
 
-
+// Public
 exports.scheduleHealthCheck = scheduleHealthCheck;
 exports.loadHttpRoutes = loadHttpRoutes;
 exports.createValidationPipeline = createValidationPipeline;

@@ -1,4 +1,9 @@
 {
+  "db": {
+    "host":"localhost",
+    "port": 28015,
+    "name": "cdsp"
+  },
   "port": 7616,
   "healthCheck": {
     "interval": 30000

@@ -252,7 +252,10 @@ const main = () => {
         debug(event);
         debug(key);
         if(subscribers[key]) {
-          subscribers[key].splice(socket);
+          console.log(socket.id);
+          console.log(subscribers[key]);
+          let spliced = subscribers[key].splice(subscribers[key].indexOf(socket.id), 1);
+          console.log(spliced);
           /** Clean it up 'bish' **/
           if(subscribers[key].length === 0) {
             // console.log(feeds[key]);
@@ -272,9 +275,9 @@ const main = () => {
           * be closed when it's usefullness ceases to exist
           **/
         if(subscribers[key]) {
-          subscribers[key].push(socket);
+          subscribers[key].push(socket.id);
         } else {
-          subscribers[key] = [socket];
+          subscribers[key] = [socket.id];
           feeds[key] = [];
           /* Start Query --
             * Need some handle on this so we can kill the query when all interested parties disconnect
@@ -287,11 +290,11 @@ const main = () => {
               console.log(`Client count ${clients.length}`);
               clients.forEach((client) => {
                 if(change.isNew === true) {
-                  client.emit('service.added', change.change);
+                  io.to(client).emit('service.added', change.change);
                 } else if(change.deleted === true) {
-                  client.emit('service.removed', change.change);
+                  io.to(client).emit('service.removed', change.change);
                 } else {
-                  client.emit('service.updated', change.change);
+                  io.to(client).emit('service.updated', change.change);
                 }
               });
             });

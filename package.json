@@ -17,6 +17,7 @@
     "coffee-script": "^1.12.2",
     "config": "^1.24.0",
     "connect": "2.x",
+    "cors": "^2.8.1",
     "debug": "^2.5.1",
     "discovery-model": "https://github.com/zacharyrote/discovery-model#development",
     "discovery-proxy": "https://github.com/zacharyrote/discovery-proxy#development",

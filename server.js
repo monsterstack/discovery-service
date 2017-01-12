@@ -7,7 +7,7 @@ const uuid = require('node-uuid');
 const optimist = require('optimist');
 const authSetup = require('socketio-auth');
 
-
+const cors = require('cors');
 
 /**
  * Discovery Service is Responsible for pushing changes to
@@ -102,6 +102,7 @@ const main = () => {
   }
 
   /* Http Routes */
+  app.use(cors());
   startup.loadHttpRoutes(app, proxy);
 
   http.listen(config.port, () => {

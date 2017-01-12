@@ -82,7 +82,7 @@ class Health {
             // Flag offline...
             service.status = model.STATUS_OFFLINE;
             console.log(model);
-            console.log(`Update status ${service.status}`);
+            console.log(`Updating status ${service.status}`);
             if(update === true) {
               model.updateService(service).then((service) => {
                 if(service) {
@@ -103,7 +103,6 @@ class Health {
               if(service) {
                 service.status = model.STATUS_ONLINE;
                 console.log("Flagging online");
-                console.log(model);
                 console.log(`Updating status ${service.status}`);
                 model.updateService(service).then((service) => {
                   debug(`updated service ${service.id}`);

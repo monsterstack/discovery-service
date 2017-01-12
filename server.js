@@ -7,7 +7,7 @@ const uuid = require('node-uuid');
 const optimist = require('optimist');
 const authSetup = require('socketio-auth');
 
-const ServiceLifecycle = require('./libs/serviceLifecycle');
+
 
 /**
  * Discovery Service is Responsible for pushing changes to
@@ -17,6 +17,7 @@ const ServiceLifecycle = require('./libs/serviceLifecycle');
  */
 const main = () => {
   let config = require('config');
+  let ServiceLifecycle = require('./libs/serviceLifecycle');
   let proxy = require('discovery-proxy');
   let async = require('async');
   let sha1 = require('sha1');

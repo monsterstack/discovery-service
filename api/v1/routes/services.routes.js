@@ -39,6 +39,8 @@ module.exports = function(app) {
    *    responses:
    *      200:
    *        description: PageResponse
+   *        schema:
+   *          $ref: '#/definitions/PageResponse'
    */
   app.get('/api/v1/services', controller.getServices(app));
 
@@ -58,6 +60,8 @@ module.exports = function(app) {
    *    responses:
    *      200:
    *        description: ServiceDescriptor
+   *        schema:
+   *          $ref: '#/definitions/ServiceDescriptor'
    */
   app.get('/api/v1/services/:id', controller.getService(app));
 }

@@ -3,7 +3,8 @@
 const glob = require('glob');
 const Promise = require('promise');
 const uuid = require('node-uuid');
-
+const express = require('express');
+const path = require('path');
 const optimist = require('optimist');
 const authSetup = require('socketio-auth');
 

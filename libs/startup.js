@@ -3,6 +3,7 @@ const debug = require('debug')('discovery-startup');
 const glob = require('glob');
 const appRoot = require('app-root-path');
 const Health = require('./health.js');
+const config = require('config');
 
 /**
  * Schedule Health Check
@@ -13,7 +14,9 @@ const scheduleHealthCheck = (model, masterCheck, interval) => {
       debug('health check');
       model.allServices().then((services) => {
         services.elements.forEach((service) => {
-          let health = new Health();
+          let health = new Health(/**{
+            bad_health_web_hook: config.health.webHookUrl
+          }**/);
           health.check(service, true).then((response) => {
             debug(response);
           }).catch((err) => {
@@ -30,6 +33,12 @@ const scheduleHealthCheck = (model, masterCheck, interval) => {
  */
 const loadHttpRoutes = (app, proxy) => {
   glob(appRoot.path + "/api/v1/routes/*.routes.js", {}, (err, files) => {
+    files.forEach((file) => {
+      require(file)(app, proxy);
+    });
+  });
+
+  glob(appRoot.path + "/app/routes/*.routes.js", {}, (err, files) => {
     files.forEach((file) => {
       require(file)(app, proxy);
     });

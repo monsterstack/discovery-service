@@ -12,6 +12,8 @@ const VERSION = 'v1';
 const ID = uuid.v1();
 
 const startup = require('./libs/startup');
+const redis = require('redis');
+const config = require('config');
 
 const overrideLocation = null;
 
@@ -157,7 +159,10 @@ const main = () => {
 
 
       /** Deal with Election of Group Leader **/
-      let leader = new Leader();
+      let redisClient = redis.createClient({
+        host: config.redis.host
+      });
+      let leader = new Leader(redisClient);
       leader.onStepUp((groupName) => {
         console.log("******************* I am master");
         console.log(groupName);

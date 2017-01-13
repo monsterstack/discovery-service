@@ -3,7 +3,7 @@
 const controller = require('../controllers/services.controller.js');
 
 /** Public **/
-module.exports = function(app) {
+module.exports = (app) => {
   /**
    * @swagger
    * /services:

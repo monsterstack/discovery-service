@@ -3,7 +3,7 @@
 const controller = require('../controllers/health.controller.js');
 
 /** Public **/
-module.exports = function(app) {
+module.exports = (app) => {
   /**
    * @swagger
    * /health:

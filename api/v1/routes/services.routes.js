@@ -64,4 +64,6 @@ module.exports = (app) => {
    *          $ref: '#/definitions/ServiceDescriptor'
    */
   app.get('/api/v1/services/:id', controller.getService(app));
+
+
 }

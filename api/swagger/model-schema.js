@@ -27,7 +27,14 @@
  *            $ref: '#/definitions/PageDescriptor'
  *       elements:
  *          type: array
- *
+ *   Count:
+ *     type: object
+ *     required:
+ *       - count
+ *     properties:
+ *       count:
+ *          type: integer
+ *          format: int64
  *   ServiceDescriptor:
  *     type: object
  *     required:

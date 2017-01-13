@@ -6,6 +6,18 @@ class ServiceDescriptorService {
     this.model = repo;
   }
 
+  countServices(stage, region) {
+    let self = this;
+    let p = new Promise((resolve, reject) => {
+      self.model.countServices(stage, region).then((count) => {
+        resolve(count);
+      }).error((err) => {
+        reject(err);
+      });
+    });
+    return p;
+  }
+
   findServiceById(id) {
     let self = this;
     let p = new Promise((resolve, reject) => {

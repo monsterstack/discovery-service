@@ -1,19 +1,17 @@
 'use strict';
 const appRoot = require('app-root-path');
 const HttpStatus = require('http-status');
-const os = require('os');
+const Error = require('../../error.js');
+const HealthService = require(appRoot + '/services/healthService');
 
 const getHealth = (app) => {
   return (req, res) => {
-    let loadAvg = os.loadavg();
-    let cpus = os.cpus();
-    let cpuMeasures = [];
-    cpus.forEach((cpu) => {
-      cpuMeasures.push(cpu.times);
-    });
-    res.status(HttpStatus.OK).send({
-      cpus: cpuMeasures,
-      load: loadAvg
+    let healthService = new HealthService();
+
+    healthService.getHealth().then((health) => {
+      res.status(HttpStatus.OK).send(health);
+    }).catch((err) => {
+      new Error(HttpStatus.INTERNAL_SERVER_ERROR, err.message).writeResponse(res);
     });
   }
 }

@@ -148,5 +148,3 @@ const main = () => {
 if(require.main === module) {
   main();
 }
-
-module.exports.client = require('./libs/client');

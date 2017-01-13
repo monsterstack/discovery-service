@@ -4,6 +4,9 @@
     "port": 28015,
     "name": "cdsp"
   },
+  "redis": {
+    "host": "u6-appserver-redis.uy6nek.0001.use1.cache.amazonaws.com"
+  },
   "port": 7616,
   "healthCheck": {
     "interval": 30000

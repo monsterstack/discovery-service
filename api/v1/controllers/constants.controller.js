@@ -1,10 +1,17 @@
 'use strict';
 const appRoot = require('app-root-path');
 const HttpStatus = require('http-status');
+const Error = require('../../error.js');
+const ConstantsService = require(appRoot + '/services/constantsService');
 
 const getConstants = (app) => {
   return (req, res) => {
-    res.status(HttpStatus.OK).send(require('../../constants'));
+    let constantsService = new ConstantsService();
+    constantsService.getConstants().then((constants) => {
+      res.status(HttpStatus.OK).send(constants);
+    }).catch((err) => {
+      new Error(HttpStatus.INTERNAL_SERVER_ERROR, err.message).writeResponse(res);
+    });
   }
 }
 

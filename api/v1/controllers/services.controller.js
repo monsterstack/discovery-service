@@ -17,17 +17,10 @@ const buildPageDescriptor = (query) => {
 
 const countServices = (app) => {
   return (req, res) => {
-    let url = require('url');
-    let url_parts = url.parse(req.url, true);
-    let query = url_parts.query;
-    let stage = query.stageFilter;
-    let region = query.regionFilter;
-
     let serviceDescriptorService = new ServiceDescriptorService(discoveryModel);
-    serviceDescriptorService.countServices(stage, region).then((count) => {
+    serviceDescriptorService.countServices().then((count) => {
       res.status(HttpStatus.OK).send(count);
     }).catch((err) => {
-      console.log(err);
       new Error(HttpStatus.INTERNAL_SERVER_ERROR, err.message).writeResponse(res);
     });
   }

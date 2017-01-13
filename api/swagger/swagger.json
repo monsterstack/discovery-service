@@ -58,6 +58,38 @@
         }
       }
     },
+    "/services/_count": {
+      "get": {
+        "description": "Get Count of Services",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "stageFilter",
+            "description": "Stage Filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "regionFilter",
+            "description": "Region Filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Count",
+            "schema": {
+              "$ref": "#/definitions/Count"
+            }
+          }
+        }
+      }
+    },
     "/services/{id}": {
       "get": {
         "description": "Get Service By Id",
@@ -117,6 +149,18 @@
         },
         "elements": {
           "type": "array"
+        }
+      }
+    },
+    "Count": {
+      "type": "object",
+      "required": [
+        "count"
+      ],
+      "properties": {
+        "count": {
+          "type": "integer",
+          "format": "int64"
         }
       }
     },

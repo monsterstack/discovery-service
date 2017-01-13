@@ -46,6 +46,32 @@ module.exports = (app) => {
 
   /**
    * @swagger
+   * /services/_count:
+   *  get:
+   *    description: Get Count of Services
+   *    produces:
+   *      - application/json
+   *    parameters:
+   *      - name: stageFilter
+   *        description: Stage Filter
+   *        in: query
+   *        required: false
+   *        type: string
+   *      - name: regionFilter
+   *        description: Region Filter
+   *        in: query
+   *        required: false
+   *        type: string
+   *    responses:
+   *      200:
+   *        description: Count
+   *        schema:
+   *          $ref: '#/definitions/Count'
+   */
+  app.get('/api/v1/services/_count', controller.countServices(app));
+
+  /**
+   * @swagger
    * /services/{id}:
    *  get:
    *    description: Get Service By Id

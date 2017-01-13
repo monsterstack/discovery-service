@@ -103,7 +103,8 @@ const main = () => {
 
   /* Http Routes */
   app.use(cors());
-  app.set('view engine', 'ejs');  
+  app.set('view engine', 'ejs');
+  app.use('/public', express.static(path.join(__dirname, 'public')));
   startup.loadHttpRoutes(app, proxy);
 
   http.listen(config.port, () => {

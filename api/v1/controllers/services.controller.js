@@ -58,6 +58,9 @@ const getServices = (app) => {
       let pageDescriptor = buildPageDescriptor(query);
       let types = query.types;
       let typesArray = [];
+      if(types) {
+        typesArray = types.split(',');
+      }
 
       let serviceDescriptorService = new ServiceDescriptorService(discoveryModel);
       serviceDescriptorService.findServices(typesArray, stage, region, pageDescriptor).then((services) => {

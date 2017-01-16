@@ -3,6 +3,13 @@
 /**
  * @swagger
  * definitions:
+ *   ServiceType:
+ *     type: object
+ *     required:
+ *       - type
+ *     properties:
+ *        type:
+ *          type: string
  *   Page:
  *     type: object
  *     required:

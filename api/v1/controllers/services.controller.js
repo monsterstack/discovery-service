@@ -40,6 +40,17 @@ const countServices = (app) => {
   }
 }
 
+const uniqueServiceTypes = (app) => {
+  return (req, res) => {
+    let serviceDescriptorService = new ServiceDescriptorService(discoveryModel);
+    serviceDescriptorService.findUniqueServiceTypes().then((unique) => {
+      res.status(HttpStatus.OK).send(unique);
+    }).catch((err) => {
+      new Error(HttpStatus.INTERNAL_SERVER_ERROR, err.message).writeResponse(res);
+    })
+  }
+}
+
 const getService = (app) => {
   return (req, res) => {
     let id = req.params.id;
@@ -92,3 +103,4 @@ const getServices = (app) => {
 exports.getService = getService;
 exports.getServices = getServices;
 exports.countServices = countServices;
+exports.uniqueServiceTypes = uniqueServiceTypes;

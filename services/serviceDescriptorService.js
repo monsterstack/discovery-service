@@ -19,6 +19,19 @@ class ServiceDescriptorService {
     return p;
   }
 
+  findUniqueServiceTypes() {
+    let self = this;
+    let p = new Promise((resolve, reject) => {
+      self.model.findUniqueServiceTypes().then((unique) => {
+        resolve(unique);
+      }).error((err) => {
+        reject(err);
+      });
+    });
+
+    return p;
+  }
+
   findServiceById(id) {
     let self = this;
     let p = new Promise((resolve, reject) => {

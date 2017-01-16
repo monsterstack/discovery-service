@@ -44,6 +44,7 @@ module.exports = (app) => {
    */
   app.get('/api/v1/services', controller.getServices(app));
 
+  app.get('/api/v1/services/_types', controller.uniqueServiceTypes(app));
   /**
    * @swagger
    * /services/_count:

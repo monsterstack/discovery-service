@@ -30,8 +30,9 @@ const countServices = (app) => {
     // Filter Params
     let stage = query.stageFilter;
     let region = query.regionFilter;
+    let status = query.statusFilter;
     let serviceDescriptorService = new ServiceDescriptorService(discoveryModel);
-    serviceDescriptorService.countServices(typesArray, stage, region).then((count) => {
+    serviceDescriptorService.countServices(typesArray, stage, region, status).then((count) => {
       res.status(HttpStatus.OK).send(count);
     }).catch((err) => {
       new Error(HttpStatus.INTERNAL_SERVER_ERROR, err.message).writeResponse(res);
@@ -66,7 +67,7 @@ const getServices = (app) => {
       // Filter Params
       let stage = query.stageFilter;
       let region = query.regionFilter;
-
+      let status = query.statusFilter;
       // Paging Descriptor
       let pageDescriptor = buildPageDescriptor(query);
       let types = query.types;
@@ -76,7 +77,7 @@ const getServices = (app) => {
       }
 
       let serviceDescriptorService = new ServiceDescriptorService(discoveryModel);
-      serviceDescriptorService.findServices(typesArray, stage, region, pageDescriptor).then((services) => {
+      serviceDescriptorService.findServices(typesArray, stage, region, status, pageDescriptor).then((services) => {
         res.status(HttpStatus.OK).send(services);
       }).catch((err) => {
         new Error(HttpStatus.INTERNAL_SERVER_ERROR, err.message).writeResponse(res);

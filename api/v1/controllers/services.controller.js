@@ -21,11 +21,17 @@ const countServices = (app) => {
     let url_parts = url.parse(req.url, true);
     let query = url_parts.query;
 
+    let types = query.types;
+    let typesArray = [];
+    if(types) {
+      typesArray = types.split(',');
+    }
+
     // Filter Params
     let stage = query.stageFilter;
     let region = query.regionFilter;
     let serviceDescriptorService = new ServiceDescriptorService(discoveryModel);
-    serviceDescriptorService.countServices(stage, region).then((count) => {
+    serviceDescriptorService.countServices(typesArray, stage, region).then((count) => {
       res.status(HttpStatus.OK).send(count);
     }).catch((err) => {
       new Error(HttpStatus.INTERNAL_SERVER_ERROR, err.message).writeResponse(res);

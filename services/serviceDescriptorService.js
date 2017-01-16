@@ -6,11 +6,11 @@ class ServiceDescriptorService {
     this.model = repo;
   }
 
-  countServices(stage, region) {
+  countServices(typesArray, stage, region) {
     let self = this;
     let p = new Promise((resolve, reject) => {
 
-      self.model.countServices(stage, region).then((count) => {
+      self.model.countServices(typesArray, stage, region).then((count) => {
         resolve(count);
       }).error((err) => {
         reject(err);
@@ -36,14 +36,24 @@ class ServiceDescriptorService {
     let p = new Promise((resolve, reject) => {
       if(typesArray.length > 0) {
         self.model.findServicesByTypes(typesArray, stage, region, pageDescriptor).then((services) => {
-          resolve(services);
+          self.model.countServices(typesArray, stage, region).then((count) => {
+            services.page.total = count.count;
+            resolve(services);
+          }).error((err) => {
+            reject(err);
+          });
         }).error((err) => {
           reject(err);
         });
       } else {
         // Nothing to find.
         self.model.allServices(stage, region, pageDescriptor).then((services) => {
-          resolve(services);
+          self.model.countServices(null, stage, region).then((count) => {
+            services.page.total = count.count;
+            resolve(services);
+          }).error((err) => {
+            reject(err);
+          });
         }).error((err) => {
           reject(err);
         });

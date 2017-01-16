@@ -9,7 +9,8 @@ class ServiceDescriptorService {
   countServices(stage, region) {
     let self = this;
     let p = new Promise((resolve, reject) => {
-      self.model.countServices().then((count) => {
+
+      self.model.countServices(stage, region).then((count) => {
         resolve(count);
       }).error((err) => {
         reject(err);

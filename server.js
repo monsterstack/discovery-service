@@ -105,6 +105,7 @@ const main = () => {
   /* Http Routes */
   app.use(cors());
   app.set('view engine', 'ejs');
+  app.use('/portal', express.static(path.join(__dirname + '/portal')));
   app.use('/public', express.static(path.join(__dirname, 'public')));
   startup.loadHttpRoutes(app, proxy);
 

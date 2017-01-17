@@ -22,7 +22,7 @@ const countServices = (app) => {
     let query = url_parts.query;
 
     let types = query.types;
-    let typesArray = [];
+    let typesArray = null;
     if(types) {
       typesArray = types.split(',');
     }

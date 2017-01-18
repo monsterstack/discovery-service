@@ -56,34 +56,8 @@ const createValidationPipeline = (descriptor) => {
   ]
 }
 
-/**
- * Create Error Handler
- */
-const createErrorHandler = (serviceId, model) => {
-  return function(options, err) {
-    if (options.cleanup) {
-      console.log('clean');
-      model.deleteService({id:serviceId}).then((service) => {
-        console.log(`Cleaned up Service ${service.id}`);
-        setTimeout(() => {
-          process.exit();
-        }, 500);
-      }).error((error) => {
-        console.log(`Service Delete failed ${serviceId}`);
-        console.log(error);
-        process.exit();
-      });
-    }
-
-    if (err) {
-      console.log(err.stack);
-      process.exit();
-    }
-  }
-}
 
 // Public
 exports.scheduleHealthCheck = scheduleHealthCheck;
 exports.loadHttpRoutes = loadHttpRoutes;
 exports.createValidationPipeline = createValidationPipeline;
-exports.exitHandlerFactory = createErrorHandler;

@@ -2,5 +2,6 @@
   "name": "DiscoveryService",
   "region": "us-east-1",
   "stage": "dev",
-  "version": "v1"
+  "version": "v1",
+  "docsPath": "http://cloudfront.mydocs.com/discovery"
 }

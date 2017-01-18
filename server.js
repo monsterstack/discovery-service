@@ -60,7 +60,7 @@ const main = () => {
     process.stdin.resume();//so the program will not close instantly
 
     // Exit handler
-    let exitHandler = startup.exitHandlerFactory(id, model);
+    let exitHandler = proxy.exitHandlerFactory(id, model);
 
     //do something when app is closing
     process.on('exit', exitHandler.bind(null,{cleanup:true}));

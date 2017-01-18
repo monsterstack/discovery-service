@@ -91,7 +91,7 @@ const main = () => {
   let healthCheckInterval = config.healthCheck.interval;
   let iAmMaster = false;
   let workers = [];
-  let exitHandler = startup.exitHandlerFactory(ID, model);
+  let exitHandler = proxy.exitHandlerFactory(ID, model);
   // Bind Exit Handler
   bindExitHandler(exitHandler, workers);
 

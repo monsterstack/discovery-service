@@ -46,7 +46,7 @@ class ServiceLifecycle {
       type: 'DiscoveryService',
       healthCheckRoute: '/health',
       schemaRoute: '/swagger.json',
-      docsRoute: '/docs/index.html',
+      docsPath: announce.docsPath,
       timestamp: new Date(),
       id: id,
       region: announce.region,

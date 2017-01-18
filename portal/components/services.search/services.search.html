@@ -76,6 +76,9 @@
                             <th sortable="type" class="sortable">
                                 <span>Service Type</span>
                             </th>
+                            <th sortable="endpoint" class="sortable">
+                                <span>Endpoint</span>
+                            </th>
                             <th sortable="uptime" class="sortable">
                                 <span>Last Modified Timestamp</span>
                             </th>
@@ -96,8 +99,9 @@
                     <tbody ng-repeat="result in vm.display.searchResults">
                         <tr grid-item>
                             <td ng-bind="result.type"></td>
+                            <td ng-bind="result.endpoint"></td>
                             <td ng-bind="result.timestamp"></td>
-                            <td ng-bind="result.docsRoute"></td>
+                            <td ng-bind="result.docsRoute" ng-click="vm.events.onDocClick(result.docsRoute)"></td>
                             <td ng-bind="result.stage"></td>
                             <td ng-bind="result.region"></td>
                             <td ng-bind="result.status"></td>

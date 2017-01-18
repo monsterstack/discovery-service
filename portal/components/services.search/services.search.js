@@ -7,7 +7,7 @@
             templateUrl:"/portal/components/services.search/services.search.html"
         });
 
-    function dspServicesSearchController($scope, $http){
+    function dspServicesSearchController($scope, $http, $window){
         let vm = this;
         let listeners = {};
 
@@ -41,6 +41,7 @@
         vm.events.onFilterChange = onFilterChange;
         vm.events.onPageChange = onPageChange;
         vm.events.onItemPerPageChange = onItemPerPageChange;
+        vm.events.onDocClick = onDocClick;
 
         function initialize($http){
             let opt = {
@@ -64,7 +65,6 @@
                     console.log("error: ", error);
                 }
             );
-
             $http.get("http://localhost:7616/api/v1/services/_types",{
                 headers:{
                     "Content-Type": "application/json"
@@ -147,6 +147,9 @@
             prepareSearch(opt);
         }
 
+        function onDocClick(url){
+            $window.open("https://www.google.com");
+        }
 
 
         function search(opt, $http){

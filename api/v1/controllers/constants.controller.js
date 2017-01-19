@@ -1,7 +1,7 @@
 'use strict';
 const appRoot = require('app-root-path');
 const HttpStatus = require('http-status');
-const Error = require('../../error.js');
+const Error = require('core-server').Error;
 const ConstantsService = require(appRoot + '/services/constantsService');
 
 const getConstants = (app) => {

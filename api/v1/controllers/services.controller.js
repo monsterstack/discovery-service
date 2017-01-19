@@ -1,7 +1,7 @@
 'use strict';
 const appRoot = require('app-root-path');
 const HttpStatus = require('http-status');
-const Error = require('../../error.js');
+const Error = require('core-server').Error;
 const ServiceDescriptorService = require(appRoot + '/services/serviceDescriptorService');
 const discoveryModel = require('discovery-model').model;
 

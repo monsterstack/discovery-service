@@ -1,8 +1,8 @@
 'use strict';
 const appRoot = require('app-root-path');
 const HttpStatus = require('http-status');
-const Error = require('../../error.js');
-const HealthService = require(appRoot + '/services/healthService');
+const Error = require('core-server').Error;
+const HealthService = require('core-server').HealthService;
 
 const getHealth = (app) => {
   return (req, res) => {

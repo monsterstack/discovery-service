@@ -1,7 +1,7 @@
 'use strict';
 const appRoot = require('app-root-path');
 const HttpStatus = require('http-status');
-const Error = require('../../error.js');
+const Error = require('core-server').Error;
 const SwaggerService = require(appRoot + '/services/swaggerService');
 const ip = require('ip');
 const swagger = require(appRoot + '/api/swagger/swagger.json');

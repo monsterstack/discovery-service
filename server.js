@@ -32,6 +32,7 @@ const main = () => {
     announcement.stage = optimist.argv.stage;
   }
 
+  console.log(require('core-server'));
   let Server = require('core-server').Server;
   let server = new Server(announcement.name, announcement, {
     discoveryHost: '0.0.0.0',

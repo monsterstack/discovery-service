@@ -44,6 +44,19 @@ class ServiceDescriptorService {
     return p;
   }
 
+  deleteServiceById(id) {
+    let self = this;
+    let p = new Promise((resolve, reject) => {
+      self.model.deleteServiceById(id).then((service) => {
+        resolve(service);
+      }).error((err) => {
+        reject(err);
+      });
+    });
+
+    return p;
+  }
+
   findServices(typesArray, stage, region, status, pageDescriptor) {
     let self = this;
     let p = new Promise((resolve, reject) => {

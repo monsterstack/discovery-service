@@ -92,5 +92,25 @@ module.exports = (app) => {
    */
   app.get('/api/v1/services/:id', controller.getService(app));
 
+  /**
+   * @swagger
+   * /services/{id}:
+   *  delete:
+   *    description: Get Service By Id
+   *    produces:
+   *      - application/json
+   *    parameters:
+   *      - name: id
+   *        description: Service Id
+   *        in: path
+   *        required: true
+   *        type: string
+   *    responses:
+   *      200:
+   *        description: ServiceDescriptor
+   *        schema:
+   *          $ref: '#/definitions/ServiceDescriptor'
+   */
+  app.delete('/api/v1/services/:id', controller.deleteService(app));
 
 }

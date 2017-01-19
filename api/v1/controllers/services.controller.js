@@ -15,6 +15,18 @@ const buildPageDescriptor = (query) => {
   }
 }
 
+const deleteService = (app) => {
+  return (req, res) => {
+    let id = req.params.id;
+
+    serviceDescriptorService.deleteService({id: id}).then((deleted) => {
+      res.status(HttpStatus.OK).send(deleted);
+    }).catch((err) => {
+      new Error(HttpStatus.INTERNAL_SERVER_ERROR, err.message).writeResponse(res);
+    })
+  }
+}
+
 const countServices = (app) => {
   return (req, res) => {
     let url = require('url');
@@ -103,4 +115,5 @@ const getServices = (app) => {
 exports.getService = getService;
 exports.getServices = getServices;
 exports.countServices = countServices;
+exports.deleteService = deleteService;
 exports.uniqueServiceTypes = uniqueServiceTypes;

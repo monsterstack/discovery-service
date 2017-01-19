@@ -52,7 +52,7 @@
                 regionFilter: "",
                 statusFilter: ""
             }
-            $http.get("http://localhost:7616/constants",{
+            $http.get("/constants",{
                 headers:{
                     "Content-Type": "application/json"
                 }
@@ -65,7 +65,7 @@
                     console.log("error: ", error);
                 }
             );
-            $http.get("http://localhost:7616/api/v1/services/_types",{
+            $http.get("/api/v1/services/_types",{
                 headers:{
                     "Content-Type": "application/json"
                 }
@@ -154,7 +154,7 @@
 
         function search(opt, $http){
             console.log("searched:::::::");
-            let url = 'http://localhost:7616/api/v1/services?'+ 'types=' + opt.types
+            let url = '/api/v1/services?'+ 'types=' + opt.types
                     +'&page=' + opt.page + '&size=' + opt.size
                     + '&stageFilter=' + opt.stageFilter + '&regionFilter=' + opt.regionFilter + '&statusFilter=' + opt.statusFilter;
             console.log(url);

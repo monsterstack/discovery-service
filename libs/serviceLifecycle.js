@@ -94,6 +94,14 @@ class ServiceLifecycle {
 
           delete this.feeds[key];
           delete this.subscribers[key];
+
+          if(socket.service_id) {
+            this.model.deleteService(socket.service_id).then((result) => {
+              console.log(result);
+            }).error((err) => {
+              console.log(err);
+            });
+          }
         }
       } else {
         debug("WARN - MISSING KEY ....... DELETE FAILED");
@@ -156,6 +164,7 @@ class ServiceLifecycle {
         } else {
           // Save Descriptor
           this.model.saveService(descriptor).then((service) => {
+            socket.service_id = service.id;
             debug(`Updated Service Descriptor in registry for ${service.id}`);
           }).error((err) => {
             debug('Error registering service');

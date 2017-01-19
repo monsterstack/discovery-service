@@ -32,7 +32,6 @@ const main = () => {
     announcement.stage = optimist.argv.stage;
   }
 
-  console.log(require('core-server'));
   let Server = require('core-server').Server;
   let server = new Server(announcement.name, announcement, {
     discoveryHost: '0.0.0.0',
@@ -40,7 +39,6 @@ const main = () => {
     useRandomWorkerPort: useRandomWorkerPort
   });
 
-  let modelRepository = require('discovery-model').model;
   let exitHandlerFactory = require('discovery-proxy').exitHandlerFactory;
 
   /** Init and handle lifecycle **/
@@ -57,8 +55,8 @@ const main = () => {
       let ioRedis = server.getIoRedis();
 
       // Service Lifecycle...
+      let modelRepository = require('discovery-model').model;
       let serviceLifecycle = new ServiceLifecycle(io, ioRedis, modelRepository);
-
       // https://www.npmjs.com/package/socketio-auth
       io.on('connection', (socket) => {
         /**
@@ -85,7 +83,9 @@ const main = () => {
         }); // -- close on-services.init
       }); // -- close on-connection
 
+      console.log('Announce ${announce}');
       if(announce === true) {
+        console.log('Announcing Existence')
         server.announce(exitHandlerFactory, modelRepository);
 
         /** Health Check Schedule **/

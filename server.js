@@ -1,44 +1,22 @@
 'use strict';
 
-const glob = require('glob');
-const Promise = require('promise');
-const uuid = require('node-uuid');
+const config = require('config');
+const optimist = require('optimist');
+const ServiceLifecycle = require('./libs/serviceLifecycle');
 const express = require('express');
 const path = require('path');
-const optimist = require('optimist');
-const authSetup = require('socketio-auth');
 
-const cors = require('cors');
-
-/**
- * Discovery Service is Responsible for pushing changes to
- * ServiceDescriptor(s) (i.e. route tables) to interested parties.
- *
- * Discovery Service also provides a Rest API to request said ServiceDescriptor(s) on demand.
- */
 const main = () => {
-  let config = require('config');
-  let ServiceLifecycle = require('./libs/serviceLifecycle');
-  let proxy = require('discovery-proxy');
-  let async = require('async');
-  let sha1 = require('sha1');
-  let debug = require('debug')('discovery-service');
-  let model = require('discovery-model').model;
   let Health = require('./libs/health.js');
   let healthCheckInterval = config.healthCheck.interval;
 
-
-  let startup = require('./libs/startup.js');
-
-  let id = uuid.v1();
-
-  let announcement = require('./announcement.json');
-  announcement.id = id;
-
   let announce = false;
+  let useRandomWorkerPort = false;
+  let announcement = require('./announcement.json');
 
+  // Handle Arguments
   if(optimist.argv.randomWorkerPort === 'true') {
-    config.port = 0;
+    useRandomWorkerPort = true;
   }
 
   if(optimist.argv.announce === 'true') {
@@ -53,102 +31,75 @@ const main = () => {
     announcement.stage = optimist.argv.stage;
   }
 
-  /**
-   * Need to bind to `exit` so we can remove DiscoveryService from registry
-   */
-  let bindCleanUp = () => {
-    process.stdin.resume();//so the program will not close instantly
-
-    // Exit handler
-    let exitHandler = proxy.exitHandlerFactory(id, model);
-
-    //do something when app is closing
-    process.on('exit', exitHandler.bind(null,{cleanup:true}));
-
-    //catches ctrl+c event
-    process.on('SIGINT', exitHandler.bind(null, {cleanup:true}));
-
-    //catches uncaught exceptions
-    process.on('uncaughtException', exitHandler.bind(null, {cleanup:true}));
-  };
-
-  console.log(`Starting Discovery Service on ${config.port}`);
-  let app = require('express')();
-  let http = require('http').Server(app);
-  let io = require('socket.io')(http);
-  let ioredis = require('socket.io-redis');
-
-  let serviceLifecycle = new ServiceLifecycle(io, ioredis, model);
-
-  /* Handle exit -- Only if announcing descriptor to self */
-  if(announce === true)
-    bindCleanUp();
-
-  if(announce === true) {
-    // Dispatch Proxy -- init / announce
-    let announcement = require('./announcement.json');
-    serviceLifecycle.getMe(id, announcement).then((me) => {
-      console.log(me);
-      proxy.connect({addr:'http://0.0.0.0:7616'}, (err, p) => {
-        p.bind({ descriptor: me, types: [] });
-      });
-    }).catch((err) => {
-      console.log(err);
-    });
-
-    /** Health Check Schedule **/
-    startup.scheduleHealthCheck(model, () => {
-      return true;
-    }, healthCheckInterval);
-  }
-
-  /* Http Routes */
-  app.use(cors());
-  app.set('view engine', 'ejs');
-  app.use('/portal', express.static(path.join(__dirname + '/portal')));
-  app.use('/public', express.static(path.join(__dirname, 'public')));
-  startup.loadHttpRoutes(app, proxy);
-
-  http.listen(config.port, () => {
-    console.log(`listening on *:${config.port}`);
+  let Server = require('core-server');
+  let server = new Server("DiscoveryService", announcement, {
+    discoveryHost: '0.0.0.0',
+    discoveryPort: 7616,
+    useRandomWorkerPort: useRandomWorkerPort
   });
 
-  // https://www.npmjs.com/package/socketio-auth
-  io.on('connection', (socket) => {
-    /**
-     * Listen for metric data from proxy.
-     */
-    socket.on('services:metrics', (msg) => {
-      serviceLifecycle.handleMetrics(msg, socket);
-    }); // -- close on-services:metrics
+  let modelRepository = require('discovery-model').model;
+  let exitHandlerFactory = require('discovery-proxy').exitHandlerFactory;
 
-    socket.on('services:offline', (msg) => {
-      serviceLifecycle.handleOffline(msg, socket);
-    }); // -- close on-services:offline
+  /** Init and handle lifecycle **/
+  server.init().then(() => {
+    let app = server.getApp();
+    // Set View Engine and Static Paths
+    app.set('view engine', 'ejs');
+    app.use('/portal', express.static(path.join(__dirname + '/portal')));
+    app.use('/public', express.static(path.join(__dirname, 'public')));
 
-    socket.on('services:online', (msg) => {
-      serviceLifecycle.handleOnline(msg, socket);
-    }); // -- close on-services:online
+    server.loadHttpRoutes();
+    server.listen().then(() => {
+      let io = server.getIo();
+      let ioRedis = server.getIoRedis();
 
-    socket.on('services:subscribe', (msg) => {
-      serviceLifecycle.handleSubscribe(msg, socket);
-    }); // -- close on-services:subscribe
+      // Service Lifecycle...
+      let serviceLifecycle = new ServiceLifecycle(io, ioRedis, modelRepository);
 
-    socket.on('services:init', (msg) => {
-      serviceLifecycle.handleInit(msg, socket);
-    }); // -- close on-services.init
-  }); // -- close on-connection
+      // https://www.npmjs.com/package/socketio-auth
+      io.on('connection', (socket) => {
+        /**
+         * Listen for metric data from proxy.
+         */
+        socket.on('services:metrics', (msg) => {
+          serviceLifecycle.handleMetrics(msg, socket);
+        }); // -- close on-services:metrics
 
+        socket.on('services:offline', (msg) => {
+          serviceLifecycle.handleOffline(msg, socket);
+        }); // -- close on-services:offline
+
+        socket.on('services:online', (msg) => {
+          serviceLifecycle.handleOnline(msg, socket);
+        }); // -- close on-services:online
+
+        socket.on('services:subscribe', (msg) => {
+          serviceLifecycle.handleSubscribe(msg, socket);
+        }); // -- close on-services:subscribe
+
+        socket.on('services:init', (msg) => {
+          serviceLifecycle.handleInit(msg, socket);
+        }); // -- close on-services.init
+      }); // -- close on-connection
+
+      if(announce === true) {
+        server.announce(exitHandlerFactory, modelRepository);
+      }
+    });
+
+
+  });
 
   process.on('message', function(msg, socket) {
       if (msg !== 'sticky-session:connection') return;
       // Emulate a connection event on the server by emitting the
       // event with the connection the master sent us.
-      http.emit('connection', socket);
+      server.getHttp().emit('connection', socket);
   });
 }
 
-/* Method main - Ha */
+
 if(require.main === module) {
   main();
 }

@@ -21,6 +21,7 @@
     "debug": "^2.5.1",
     "discovery-model": "https://github.com/zacharyrote/discovery-model#development",
     "discovery-proxy": "https://github.com/zacharyrote/discovery-proxy#development",
+    "core-server": "https://github.com/zacharyrote/core-server#development",
     "ejs": "^2.5.5",
     "express": "^4.14.0",
     "external-ip": "^0.2.4",

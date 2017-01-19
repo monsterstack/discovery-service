@@ -2,7 +2,7 @@
     <form novalidate style="width: 90%; margin: auto;">
         <md-card-header style="display:flex;">
             <ui-select multiple theme="bootstrap" ng-model="vm.display.searchCriteria" close-on-select="false" style="width: 100%;"
-            ng-change="vm.events.onSearchCriteriaChange()">
+            ng-change="vm.events.onSearchCriteriaChange()" ng-click="vm.events.refreshServiceTypes()">
                 <ui-select-match placeholder="Select Service Types...">{{$item}}</ui-select-match>
                 <ui-select-choices repeat="type in vm.display.serviceTypes | filter:$select.search | limitTo:8">
                   {{type}}

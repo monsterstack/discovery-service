@@ -7,7 +7,6 @@ const express = require('express');
 const path = require('path');
 const optimist = require('optimist');
 const authSetup = require('socketio-auth');
-
 const cors = require('cors');
 
 /**

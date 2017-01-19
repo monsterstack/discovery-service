@@ -5,6 +5,7 @@ const optimist = require('optimist');
 const ServiceLifecycle = require('./libs/serviceLifecycle');
 const express = require('express');
 const path = require('path');
+const startup = require('./libs/startup');
 
 const main = () => {
   let Health = require('./libs/health.js');
@@ -32,7 +33,7 @@ const main = () => {
   }
 
   let Server = require('core-server');
-  let server = new Server("DiscoveryService", announcement, {
+  let server = new Server(announcement.name, announcement, {
     discoveryHost: '0.0.0.0',
     discoveryPort: 7616,
     useRandomWorkerPort: useRandomWorkerPort
@@ -85,10 +86,13 @@ const main = () => {
 
       if(announce === true) {
         server.announce(exitHandlerFactory, modelRepository);
+
+        /** Health Check Schedule **/
+        startup.scheduleHealthCheck(model, () => {
+          return true;
+        }, healthCheckInterval);
       }
     });
-
-
   });
 
   process.on('message', function(msg, socket) {

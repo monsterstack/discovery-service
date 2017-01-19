@@ -83,13 +83,13 @@ const main = () => {
         }); // -- close on-services.init
       }); // -- close on-connection
 
-      console.log('Announce ${announce}');
+      console.log(`Announce ${announce}`);
       if(announce === true) {
         console.log('Announcing Existence')
         server.announce(exitHandlerFactory, modelRepository);
 
         /** Health Check Schedule **/
-        startup.scheduleHealthCheck(model, () => {
+        startup.scheduleHealthCheck(modelRepository, () => {
           return true;
         }, healthCheckInterval);
       }

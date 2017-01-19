@@ -7,6 +7,7 @@ const sha1 = require('sha1');
 const startup = require('./startup');
 const Promise = require('promise');
 const RESPONSE_TIME_METRIC_KEY = "response_time";
+const REFRESH_EVENT = "refresh_event";
 
 class ServiceLifecycle {
   constructor(io, ioredis, repo) {
@@ -94,18 +95,23 @@ class ServiceLifecycle {
 
           delete this.feeds[key];
           delete this.subscribers[key];
-
-          if(socket.service_id) {
-            this.model.deleteService(socket.service_id).then((result) => {
-              console.log(result);
-            }).error((err) => {
-              console.log(err);
-            });
-          }
         }
       } else {
         debug("WARN - MISSING KEY ....... DELETE FAILED");
       }
+
+      if(socket.service_id) {
+        console.log(`Deleting Service ${socket.service_id}`);
+        this.model.deleteService(socket.service_id).then((result) => {
+          console.log(`Deleted Service ${socket.service_id}`);
+          socket.broadcast.emit(REFRESH_EVENT, { serviceId: socket.service_id });
+        }).error((err) => {
+          console.log(err);
+        });
+      } else {
+        console.log(`Socket missing services id`);
+      }
+
     }); // close on-disconnect
 
     if(query.types && query.types.length > 0) {
@@ -166,6 +172,7 @@ class ServiceLifecycle {
           this.model.saveService(descriptor).then((service) => {
             socket.service_id = service.id;
             debug(`Updated Service Descriptor in registry for ${service.id}`);
+            socket.broadcast.emit(REFRESH_EVENT, { serviceId: service.id });
           }).error((err) => {
             debug('Error registering service');
             debug(err);
@@ -200,6 +207,7 @@ class ServiceLifecycle {
         service.status = this.model.STATUS_ONLINE;
         model.updateService(service).then((service) => {
           debug(`updated status of service ${service.id} to online`);
+          socket.broadcast.emit(REFRESH_EVENT, { serviceId: socket.service_id });
         }).error((error) => {
           debug(error);
         });
@@ -217,6 +225,7 @@ class ServiceLifecycle {
         service.status = this.model.STATUS_OFFLINE;
         model.updateService(service).then((service) => {
           debug(`updated status of service ${service.id} to offline`);
+          socket.broadcast.emit(REFRESH_EVENT, { serviceId: socket.service_id });
         }).error((error) => {
           debug(error);
         });

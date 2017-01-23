@@ -7,7 +7,7 @@
             templateUrl:"/portal/components/services.search/services.search.html"
         });
 
-    function dspServicesSearchController($scope, $http, $window){
+    function dspServicesSearchController($scope, $http, $window, socket){
         let vm = this;
         let listeners = {};
 
@@ -44,7 +44,10 @@
         vm.events.onDocClick = onDocClick;
         vm.events.refreshServiceTypes = refreshServiceTypes;
 
+
+
         function initialize($http){
+            const REFRESH_EVENT = "refresh_event";
             let opt = {
                 types: "",
                 page: 0,
@@ -55,6 +58,11 @@
             }
             getConstantsForFiltering();
             getServiceTypes();
+
+            socket.on(REFRESH_EVENT,function(res){
+                console.log("service changed, serviceId:", res);
+                vm.display.searchSubmitted = false;
+            });
 
             search(opt, $http);
         }

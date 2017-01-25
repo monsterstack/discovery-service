@@ -14,6 +14,7 @@ module.exports = function(app) {
    *    responses:
    *      200:
    *        description: Constants
+   *        type: object
    */
   app.get('/constants', controller.getConstants(app));
 }

@@ -169,14 +169,32 @@ class ServiceLifecycle {
           debug(err);
         } else {
           // Save Descriptor
-          this.model.saveService(descriptor).then((service) => {
-            socket.service_id = service.id;
-            debug(`Updated Service Descriptor in registry for ${service.id}`);
-            socket.broadcast.emit(REFRESH_EVENT, { serviceId: service.id });
-          }).error((err) => {
-            debug('Error registering service');
-            debug(err);
+          this.model.findServiceByEndpoint(descriptor.endpoint).then((service) => {
+            if(service === null) {
+              // Save.
+              // find by endpoint -- if not there save else update
+              this.model.saveService(descriptor).then((service) => {
+                socket.service_id = service.id;
+                debug(`Updated Service Descriptor in registry for ${service.id}`);
+                socket.broadcast.emit(REFRESH_EVENT, { serviceId: service.id });
+              }).error((err) => {
+                debug('Error registering service');
+                debug(err);
+              });
+            } else {
+              // Update.
+              descriptor.id = service.id;
+              this.model.updateService(descriptor).then((updated) => {
+                socket.service_id = updated.id;
+                debug(`Updated Service Descriptor in registry for ${updated.id}`);
+                socket.broadcast.emit(REFRESH_EVENT, { serviceId: updated.id});
+              }).error((err) => {
+                debug('Error registering service');
+                debug(err);
+              });
+            }
           });
+
           // Find services by types..
           this.model.findServicesByTypes(query.types).then((services) => {
             services.elements.forEach((service) => {

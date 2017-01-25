@@ -11,6 +11,8 @@ module.exports = (app) => {
    *    description: Get Health of Service
    *    produces:
    *      - application/json
+   *    consumes:
+   *      - application/json
    *    parameters:
    *      - name: types
    *        description: Types of Services
@@ -52,6 +54,8 @@ module.exports = (app) => {
    *    description: Get Count of Services
    *    produces:
    *      - application/json
+   *    consumes:
+   *      - application/json
    *    parameters:
    *      - name: stageFilter
    *        description: Stage Filter
@@ -78,6 +82,8 @@ module.exports = (app) => {
    *    description: Get Service By Id
    *    produces:
    *      - application/json
+   *    consumes:
+   *      - application/json
    *    parameters:
    *      - name: id
    *        description: Service Id
@@ -98,6 +104,8 @@ module.exports = (app) => {
    *  delete:
    *    description: Get Service By Id
    *    produces:
+   *      - application/json
+   *    consumes:
    *      - application/json
    *    parameters:
    *      - name: id

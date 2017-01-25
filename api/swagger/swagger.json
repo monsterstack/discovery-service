@@ -6,10 +6,50 @@
   },
   "swagger": "2.0",
   "paths": {
+    "/constants": {
+      "get": {
+        "description": "Get Service Constants",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Constants",
+            "type": "object"
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "description": "Get Health of Service",
+        "tags": [
+          "health"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Health",
+            "type": "object",
+            "schema": {
+              "$ref": "#/definitions/Health"
+            }
+          }
+        }
+      }
+    },
     "/services": {
       "get": {
         "description": "Get Health of Service",
         "produces": [
+          "application/json"
+        ],
+        "consumes": [
           "application/json"
         ],
         "parameters": [
@@ -64,6 +104,9 @@
         "produces": [
           "application/json"
         ],
+        "consumes": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "stageFilter",
@@ -96,6 +139,35 @@
         "produces": [
           "application/json"
         ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Service Id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ServiceDescriptor",
+            "schema": {
+              "$ref": "#/definitions/ServiceDescriptor"
+            }
+          }
+        }
+      },
+      "delete": {
+        "description": "Get Service By Id",
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -117,11 +189,53 @@
     }
   },
   "definitions": {
-    "Page": {
+    "Error": {
+      "type": "object",
+      "required": [
+        "errorMessage"
+      ],
+      "properties": {
+        "errorMessage": {
+          "type": "string"
+        }
+      }
+    },
+    "Health": {
+      "type": "object",
+      "required": [
+        "cpuPercentUsage",
+        "totalMemPercentageUsage",
+        "loadAvg"
+      ],
+      "properties": {
+        "cpuPercentUsage": {
+          "type": "number"
+        },
+        "totalMemPercentageUsage": {
+          "type": "number"
+        },
+        "loadAvg": {
+          "type": "number"
+        }
+      }
+    },
+    "ServiceType": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string"
+        }
+      }
+    },
+    "PageDescriptor": {
       "type": "object",
       "required": [
         "page",
-        "size"
+        "size",
+        "total"
       ],
       "properties": {
         "page": {
@@ -129,6 +243,10 @@
           "format": "int64"
         },
         "size": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "total": {
           "type": "integer",
           "format": "int64"
         }
@@ -148,7 +266,8 @@
           }
         },
         "elements": {
-          "type": "array"
+          "type": "array",
+          "$ref": "#/definitions/ServiceDescriptor"
         }
       }
     },

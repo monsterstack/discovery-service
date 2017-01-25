@@ -16,6 +16,13 @@
  *        - cpuPercentUsage
  *        - totalMemPercentageUsage
  *        - loadAvg
+ *     properties:
+ *        cpuPercentUsage:
+ *          type: number
+ *        totalMemPercentageUsage:
+ *          type: number
+ *        loadAvg:
+ *          type: number
  *   ServiceType:
  *     type: object
  *     required:
@@ -51,6 +58,7 @@
  *            $ref: '#/definitions/PageDescriptor'
  *       elements:
  *          type: array
+ *          $ref: '#/definitions/ServiceDescriptor'
  *   Count:
  *     type: object
  *     required:

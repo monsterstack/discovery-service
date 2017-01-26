@@ -1,7 +1,7 @@
 'use strict';
 const appRoot = require('app-root-path');
 const HttpStatus = require('http-status');
-const Error = require('core-server').Error;
+const ServiceError = require('core-server').ServiceError;
 const ServiceDescriptorService = require(appRoot + '/services/serviceDescriptorService');
 const discoveryModel = require('discovery-model').model;
 
@@ -22,7 +22,7 @@ const deleteService = (app) => {
     serviceDescriptorService.deleteService({id: id}).then((deleted) => {
       res.status(HttpStatus.OK).send(deleted);
     }).catch((err) => {
-      new Error(HttpStatus.INTERNAL_SERVER_ERROR, err.message).writeResponse(res);
+      new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR, err.message).writeResponse(res);
     })
   }
 }
@@ -47,7 +47,7 @@ const countServices = (app) => {
     serviceDescriptorService.countServices(typesArray, stage, region, status).then((count) => {
       res.status(HttpStatus.OK).send(count);
     }).catch((err) => {
-      new Error(HttpStatus.INTERNAL_SERVER_ERROR, err.message).writeResponse(res);
+      new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR, err.message).writeResponse(res);
     });
   }
 }
@@ -58,7 +58,7 @@ const uniqueServiceTypes = (app) => {
     serviceDescriptorService.findUniqueServiceTypes().then((unique) => {
       res.status(HttpStatus.OK).send(unique);
     }).catch((err) => {
-      new Error(HttpStatus.INTERNAL_SERVER_ERROR, err.message).writeResponse(res);
+      new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR, err.message).writeResponse(res);
     })
   }
 }
@@ -72,9 +72,9 @@ const getService = (app) => {
     }).catch((err) => {
       if(err.name === 'DocumentNotFoundError') {
         let msg = `Service Not Found ${id}`;
-        new Error(HttpStatus.NOT_FOUND, msg).writeResponse(res);
+        new ServiceError(HttpStatus.NOT_FOUND, msg).writeResponse(res);
       } else {
-        new Error(HttpStatus.INTERNAL_SERVER_ERROR, err.message).writeResponse(res);
+        new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR, err.message).writeResponse(res);
       }
     });
   }
@@ -103,10 +103,10 @@ const getServices = (app) => {
       serviceDescriptorService.findServices(typesArray, stage, region, status, pageDescriptor).then((services) => {
         res.status(HttpStatus.OK).send(services);
       }).catch((err) => {
-        new Error(HttpStatus.INTERNAL_SERVER_ERROR, err.message).writeResponse(res);
+        new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR, err.message).writeResponse(res);
       });
     } catch (err) {
-       new Error(HttpStatus.INTERNAL_SERVER_ERROR, err.message).writeResponse(res);
+       new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR, err.message).writeResponse(res);
     }
   }
 }

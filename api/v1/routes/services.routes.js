@@ -9,6 +9,9 @@ module.exports = (app) => {
    * /services:
    *  get:
    *    description: Get Health of Service
+   *    tags:
+   *      - services
+   *    operationId: getServices
    *    produces:
    *      - application/json
    *    consumes:
@@ -46,12 +49,36 @@ module.exports = (app) => {
    */
   app.get('/api/v1/services', controller.getServices(app));
 
+  /**
+   * @swagger
+   * /services/_types:
+   *  get:
+   *    description: Get Unique Service Types
+   *    tags:
+   *      - services
+   *    operationId: uniqueServiceTypes
+   *    produces:
+   *      - application/json
+   *    consumes:
+   *      - application/json
+   *    responses:
+   *      200:
+   *        description: ServiceTypes
+   *        type: array
+   *        items:
+   *          schema:
+   *            $ref: '#/definitions/ServiceType'
+   */
   app.get('/api/v1/services/_types', controller.uniqueServiceTypes(app));
+  
   /**
    * @swagger
    * /services/_count:
    *  get:
    *    description: Get Count of Services
+   *    tags:
+   *      - services
+   *    operationId: count
    *    produces:
    *      - application/json
    *    consumes:
@@ -80,6 +107,9 @@ module.exports = (app) => {
    * /services/{id}:
    *  get:
    *    description: Get Service By Id
+   *    tags:
+   *      - services
+   *    operationId: getServiceById
    *    produces:
    *      - application/json
    *    consumes:
@@ -103,6 +133,9 @@ module.exports = (app) => {
    * /services/{id}:
    *  delete:
    *    description: Get Service By Id
+   *    operationId: deleteServiceById
+   *    tags:
+   *      - services
    *    produces:
    *      - application/json
    *    consumes:

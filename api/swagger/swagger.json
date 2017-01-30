@@ -46,6 +46,10 @@
     "/services": {
       "get": {
         "description": "Get Health of Service",
+        "tags": [
+          "services"
+        ],
+        "operationId": "getServices",
         "produces": [
           "application/json"
         ],
@@ -98,9 +102,39 @@
         }
       }
     },
+    "/services/_types": {
+      "get": {
+        "description": "Get Unique Service Types",
+        "tags": [
+          "services"
+        ],
+        "operationId": "uniqueServiceTypes",
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "ServiceTypes",
+            "type": "array",
+            "items": {
+              "schema": {
+                "$ref": "#/definitions/ServiceType"
+              }
+            }
+          }
+        }
+      }
+    },
     "/services/_count": {
       "get": {
         "description": "Get Count of Services",
+        "tags": [
+          "services"
+        ],
+        "operationId": "count",
         "produces": [
           "application/json"
         ],
@@ -136,6 +170,10 @@
     "/services/{id}": {
       "get": {
         "description": "Get Service By Id",
+        "tags": [
+          "services"
+        ],
+        "operationId": "getServiceById",
         "produces": [
           "application/json"
         ],
@@ -162,6 +200,10 @@
       },
       "delete": {
         "description": "Get Service By Id",
+        "operationId": "deleteServiceById",
+        "tags": [
+          "services"
+        ],
         "produces": [
           "application/json"
         ],

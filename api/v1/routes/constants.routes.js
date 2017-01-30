@@ -9,6 +9,7 @@ module.exports = function(app) {
    * /constants:
    *  get:
    *    description: Get Service Constants
+   *    operationId: getConstants
    *    produces:
    *      - application/json
    *    responses:

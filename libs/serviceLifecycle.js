@@ -28,11 +28,14 @@ class ServiceLifecycle extends EventEmitter {
     this.model = repo;
     this.io = io;
     this.ioredis = ioredis;
+
+    // Clustered Socket IO using Redis -- Move out of lifecycle
     // io.adapter(ioredis({
     //   host: 'localhost',
     //   port: 6379
     // }));
 
+    // Authorization of Client Connection -- Move out of lifecycle
     // authSetup(io, {
     //   authenticate: (socket, data, callback) => {
     //       callback(null, true);
@@ -201,6 +204,19 @@ class ServiceLifecycle extends EventEmitter {
     }
   }
 
+  /**
+   * Handle Init
+   * We run the announced descriptor through a validation pipeline to verify
+   *  - 1. Health
+   *  - 2. Swagger
+   *  - 3. Docs Path
+   * If any of these checks fail for the descriptor, the descriptor does not
+   * make it into the registry.
+   *
+   * After handling the Announcement, We look up the Service Descriptor(s) the
+   * announcing service is interested in.
+   * These descriptors are sent back to the client via the `service.init` channel.
+   */
   handleInit(initMessage, socket) {
     debug(initMessage);
     let query = initMessage;
@@ -252,7 +268,9 @@ class ServiceLifecycle extends EventEmitter {
       });
     } else {
       // No Descriptor so just init the query types.
-      // Find services by types..
+      // Find services by types..  This result is a pagedResponse.
+      // Need to reconsider this approach.  I believe the default page size is 10..
+      // Will be an issue when the number of services grows .
       this.model.findServicesByTypes(query.types).then((services) => {
         debug(services);
         services.elements.forEach((service) => {
@@ -263,6 +281,12 @@ class ServiceLifecycle extends EventEmitter {
     }
   }
 
+  /**
+   * Handle Online
+   * When a client detects that a service it uses is has come back up
+   * the Discovery Service Lifecycle expects the client to notify
+   * that the service is 'Online'
+   */
   handleOnline(onlineMessage, socket) {
     debug(onlineMessage);
     let serviceId = onlineMessage.serviceId;
@@ -281,6 +305,12 @@ class ServiceLifecycle extends EventEmitter {
     });
   }
 
+  /**
+   * Handle Offline
+   * When a client detects that a service it uses is `not available` or returning
+   * a 'bad gateway' the Discovery Service Lifecycle expects the client to notify
+   * that the service is 'Offline'
+   */
   handleOffline(offlineMessage, socket) {
     debug(offlineMessage);
     let serviceId = offlineMessage.serviceId;
@@ -299,6 +329,13 @@ class ServiceLifecycle extends EventEmitter {
     });
   }
 
+  /**
+   * Handle Metrics
+   * The Discovery Service Lifecycle allows for the discovery-proxy to report
+   * metrics such as 'response time' after making a call to a dependent service.
+   * These metrics are recorded and in the case of 'response time', a rolling avg
+   * is computed.
+   */
   handleMetrics(metric, socket) {
     let serviceId = metric.serviceId;
     let value = metric.value;

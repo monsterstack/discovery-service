@@ -58,6 +58,31 @@ const main = () => {
       // Service Lifecycle...
       let modelRepository = require('discovery-model').model;
       let serviceLifecycle = new ServiceLifecycle(io, ioRedis, modelRepository);
+
+      // Feed Change
+      serviceLifecycle.on('feed.change', (feeds) => {
+        console.log("Feeds");
+        console.log(Object.keys(feeds));
+        app.feeds = feeds;
+      });
+
+      // Query Change
+      serviceLifecycle.on('query.change', (queries) => {
+        app.queries = queries;
+      });
+
+      // Subscriber Change
+      serviceLifecycle.on('subscriber.change', (subscribers) => {
+        app.subscribers = subscribers;
+      });
+
+      serviceLifecycle.on('service.added', (obj) => {
+        console.log(`Service Added ${obj.feedKey} - ${obj.change.type}`);
+      });
+      serviceLifecycle.on('service.removed', (obj) => {
+        console.log(`Service Removed ${obj.feedKey} - ${obj.change.type}`);
+      });
+
       // https://www.npmjs.com/package/socketio-auth
       io.on('connection', (socket) => {
         /**

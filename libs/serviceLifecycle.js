@@ -9,8 +9,22 @@ const Promise = require('promise');
 const RESPONSE_TIME_METRIC_KEY = "response_time";
 const REFRESH_EVENT = "refresh_event";
 
-class ServiceLifecycle {
+const EventEmitter = require('events').EventEmitter;
+
+/**
+ * ServiceLifecycle - Discovery Server
+ *
+ * 1. Websocket client connect
+ * 2. Authorization Request From Client
+ * 3. Init ( Ask for ServiceDescriptor(s) that are of interest )
+ * 4. Subscribe ( Ask to be notified of changes to ServiceDescriptor(s) of interest)
+ * 5. Notify Discovery of Service deemed to be 'Online'
+ * 6. Notify Discovery of Service deemed to be 'Offline'
+ * 7. Websocket disconnect => Clean up Subscription if exists.
+ */
+class ServiceLifecycle extends EventEmitter {
   constructor(io, ioredis, repo) {
+    super();
     this.model = repo;
     this.io = io;
     this.ioredis = ioredis;
@@ -36,12 +50,18 @@ class ServiceLifecycle {
      */
     this.subscribers = {};
     this.feeds = {};
+    this.queries = {};
 
     setInterval(() => {
-      console.log(Object.keys(this.feeds));
+      debug(Object.keys(this.feeds));
     }, 30000);
   }
 
+  /**
+   * Get Me
+   * Essentially construct an announcement of the
+   * existence of the DiscoveryService.
+   */
   getMe(id, announce) {
     let descriptor = {
       type: 'DiscoveryService',
@@ -58,7 +78,7 @@ class ServiceLifecycle {
 
     let p = new Promise((resolve, reject) => {
       let ip = require('ip');
-      console.log(ip.address());
+      debug(`IP is ${ip.address()}`);
       descriptor.endpoint = "http://"+ip.address()+":"+config.port
       resolve(descriptor);
     });
@@ -67,6 +87,20 @@ class ServiceLifecycle {
 
   authenticate() {
 
+  }
+
+  _addSubscriber(key, socket) {
+    if(this.subscribers[key].indexOf(socket.id) == -1)
+      this.subscribers[key].push(socket.id);
+  }
+
+  _createAndAddToSubscriberQueue(key, socket) {
+    this.subscribers[key] = [socket.id];
+  }
+
+  _removeSubscriber(key) {
+    delete this.feeds[key];
+    delete this.subscribers[key];
   }
 
   handleSubscribe(subscribeMessage, socket) {
@@ -84,26 +118,28 @@ class ServiceLifecycle {
       debug(event);
       debug(key);
       if(this.subscribers[key]) {
-        console.log(`Socket id ${socket.id}`);
-        console.log(`Before ${this.subscribers[key]}`);
+        debug(`Socket id ${socket.id}`);
+        debug(`Before ${this.subscribers[key]}`);
         let spliced = this.subscribers[key].splice(this.subscribers[key].indexOf(socket.id), 1);
-        console.log(`After ${this.subscribers[key]}`);
+        debug(`After ${this.subscribers[key]}`);
         /** Clean it up 'bish' **/
         if(this.subscribers[key].length === 0) {
           // console.log(feeds[key]);
-          // feeds[key].closeFeed();
+          //this.feeds[key].close();
+          //this.feeds[key]._model.removeAllListeners();
 
-          delete this.feeds[key];
-          delete this.subscribers[key];
+          this._removeSubscriber(key);
+          this.emit('subscriber.change', this.subscribers);
+          this.emit('feed.change', this.feeds);
         }
       } else {
-        debug("WARN - MISSING KEY ....... DELETE FAILED");
+        debug("WARN - MISSING KEY ....... FEED DELETE FAILED");
       }
 
       if(socket.service_id) {
-        console.log(`Deleting Service ${socket.service_id}`);
+        debug(`Deleting Service ${socket.service_id}`);
         this.model.deleteService(socket.service_id).then((result) => {
-          console.log(`Deleted Service ${socket.service_id}`);
+          debug(`Deleted Service ${socket.service_id}`);
           socket.broadcast.emit(REFRESH_EVENT, { serviceId: socket.service_id });
         }).error((err) => {
           console.log(err);
@@ -115,43 +151,52 @@ class ServiceLifecycle {
     }); // close on-disconnect
 
     if(query.types && query.types.length > 0) {
+      this.queries[key] = query;
+      this.emit('query.change', this.queries);
       /**
         * Bundle all connected clients based on interested query 'sha'
         * Also, keep track of the feed by query 'sha' such that the feed can
         * be closed when it's usefullness ceases to exist
         **/
       if(this.subscribers[key]) {
-        this.subscribers[key].push(socket.id);
+        this._addSubscriber(key, socket);
+        this.emit('subscriber.change', this.subscribers);
       } else {
-        this.subscribers[key] = [socket.id];
+        this._createAndAddToSubscriberQueue(key, socket);
         this.feeds[key] = [];
         /* Start Query --
           * Need some handle on this so we can kill the query when all interested parties disconnect
           */
         let myFeed = this.model.onServiceChange(query.types, (err, change) => {
-          let keys = Object.keys(this.subscribers);
-          keys.forEach((key) => {
-            console.log(key);
-            let clients = this.subscribers[key];
-            console.log(`Client count ${clients.length}`);
+          //let keys = Object.keys(this.subscribers);
+          let clients = this.subscribers[key];
+          let clientCount = 0;
+          if(clients) {
+            clientCount = clients.length;
+          }
+          console.log(`............................Client Count ${clientCount}`);
+          if(clients) {
+            console.log(clients);
             clients.forEach((client) => {
-              console.log(`Sending to client ${client}`);
-              console.log(clients);
               if(change.isNew === true) {
-                console.log('Sending add');
-                this.io.to(client).emit('service.added', change.change);
+                this.emit('service.added', { feedKey: key, change: change.change });
+                this.io.sockets.connected[client].emit('service.added', change.change);
               } else if(change.deleted === true) {
-                console.log('Sending remove');
-                this.io.to(client).emit('service.removed', change.change);
+                this.emit('service.removed', { feedKey: key, change: change.change });
+                this.io.sockets.connected[client].emit('service.removed', change.change);
               } else {
-                console.log('Sending update');
-                this.io.to(client).emit('service.updated', change.change);
+                this.emit('service.updated', { feedKey: key, change: change.change });
+                this.io.sockets.connected[client].emit('service.updated', change.change);
               }
             });
-          });
+          }
         });
 
+
+        myFeed.query = query;
         this.feeds[key] = myFeed;
+        this.emit('feed.change', this.feeds);
+        this.emit('subscriber.change', this.subscribers);
       }
     }
   }
@@ -200,6 +245,7 @@ class ServiceLifecycle {
             services.elements.forEach((service) => {
               debug(service);
               socket.emit('service.init', service);
+              this.emit('service.init', service);
             });
           });
         }
@@ -287,8 +333,6 @@ class ServiceLifecycle {
       });
     }
   }
-
-
 }
 
 // Public

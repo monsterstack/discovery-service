@@ -1,5 +1,5 @@
 'use strict';
-
+const HttpStatus = require('http-status');
 const controller = require('../controllers/services.controller.js');
 
 /** Public **/
@@ -70,7 +70,7 @@ module.exports = (app) => {
    *            $ref: '#/definitions/ServiceType'
    */
   app.get('/api/v1/services/_types', controller.uniqueServiceTypes(app));
-  
+
   /**
    * @swagger
    * /services/_count:
@@ -153,5 +153,34 @@ module.exports = (app) => {
    *          $ref: '#/definitions/ServiceDescriptor'
    */
   app.delete('/api/v1/services/:id', controller.deleteService(app));
+
+
+  app.get('/feeds', (req, res) => {
+    let queries = [];
+    if(app.feeds) {
+      let keys = Object.keys(app.feeds);
+      for(let i in keys)
+        queries.push({ key: keys[i], query: app.feeds[keys[i]].query });
+    }
+    res.status(HttpStatus.OK).send(queries);
+  });
+
+  app.get('/subscribers', (req, res) => {
+    let subscribers = [];
+    if(app.subscribers) {
+      let keys = Object.keys(app.subscribers);
+      for(let i in keys)
+        subscribers.push({ key: keys[i], subscribers: app.subscribers[keys[i]] });
+    }
+    res.status(HttpStatus.OK).send(subscribers);
+  });
+
+  app.get('/queries', (req, res) => {
+    let queries = {};
+    if(app.queries) {
+      queries = app.queries;
+    }
+    res.status(HttpStatus.OK).send(queries);
+  });
 
 }

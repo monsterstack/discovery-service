@@ -29,19 +29,6 @@ class ServiceLifecycle extends EventEmitter {
     this.io = io;
     this.ioredis = ioredis;
 
-    // Clustered Socket IO using Redis -- Move out of lifecycle
-    // io.adapter(ioredis({
-    //   host: 'localhost',
-    //   port: 6379
-    // }));
-
-    // Authorization of Client Connection -- Move out of lifecycle
-    // authSetup(io, {
-    //   authenticate: (socket, data, callback) => {
-    //       callback(null, true);
-    //   }
-    // });
-
     /*
      * Clients interested in discovery
      * Here we want to map the query to an array of clients performing

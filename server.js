@@ -120,6 +120,8 @@ const main = () => {
         }, healthCheckInterval);
       }
     });
+  }).catch((err) => {
+    console.log(err);
   });
 
   process.on('message', function(msg, socket) {

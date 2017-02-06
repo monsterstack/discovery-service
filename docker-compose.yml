@@ -7,11 +7,3 @@ services:
       - "8080:8080"
     volumes:
       - .:/code
-  #   redis:
-  #     image: "redis:alpine"
-  # db:
-  #   ports:
-  #     - "28015:28015"
-  #     - "29015:29015"
-  #   rethinkdb:
-  #     image: "rethinkdb:jessie"

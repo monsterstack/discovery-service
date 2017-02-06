@@ -1,15 +1,19 @@
 {
   "db": {
     "host":"192.168.99.100",
-    "port": 32769,
+    "port": 32775,
     "name": "cdsp"
+  },
+  "discovery": {
+    "host": "localhost",
+    "port": 7616
   },
   "health": {
     "webHookUrl": "http://foo.org"
   },
   "redis": {
     "host": "192.168.99.100",
-    "port": 32775
+    "port": 32773
   },
   "websockets": {
     "enabled": true

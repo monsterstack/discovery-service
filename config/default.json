@@ -1,14 +1,15 @@
 {
   "db": {
-    "host":"localhost",
-    "port": 28015,
+    "host":"192.168.99.100",
+    "port": 32769,
     "name": "cdsp"
   },
   "health": {
     "webHookUrl": "http://foo.org"
   },
   "redis": {
-    "host": "u6-appserver-redis.uy6nek.0001.use1.cache.amazonaws.com"
+    "host": "192.168.99.100",
+    "port": 32775
   },
   "websockets": {
     "enabled": true

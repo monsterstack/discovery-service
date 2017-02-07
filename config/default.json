@@ -1,7 +1,7 @@
 {
   "db": {
-    "host":"192.168.99.100",
-    "port": 32775,
+    "host":"192.168.99.101",
+    "port": 28015,
     "name": "cdsp"
   },
   "discovery": {
@@ -12,11 +12,16 @@
     "webHookUrl": "http://foo.org"
   },
   "redis": {
-    "host": "192.168.99.100",
-    "port": 32773
+    "host": "192.168.99.101",
+    "port": 6379
   },
   "websockets": {
     "enabled": true
+  },
+  "stash": {
+    "type": "tcp",
+    "host": "192.168.99.101",
+    "port": 9600
   },
   "port": 7616,
   "healthCheck": {

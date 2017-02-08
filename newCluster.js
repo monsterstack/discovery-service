@@ -1,7 +1,7 @@
 'use strict';
 const config = require('config');
 const Cluster = require('core-server').Cluster;
-
+const startup = require('./libs/startup');
 const optimist = require('optimist');
 
 const main = () => {
@@ -24,6 +24,15 @@ const main = () => {
   cluster.bindExitHandler(exitHandler);
 
   cluster.start();
+
+  let healthCheckInterval = config.healthCheck.interval;
+
+  /** Health Check Schedule **/
+  let masterCheck = () => {
+    return cluster.iAmMaster;
+  };
+
+  startup.scheduleHealthCheck(model, masterCheck, healthCheckInterval);
 }
 
 

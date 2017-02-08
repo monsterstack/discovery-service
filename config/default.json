@@ -1,6 +1,6 @@
 {
   "db": {
-    "host":"cdsp.digitalfunk.io",
+    "host":"192.168.99.101",
     "port": 28015,
     "name": "cdsp"
   },
@@ -12,7 +12,7 @@
     "webHookUrl": "http://foo.org"
   },
   "redis": {
-    "host": "cdsp.digitalfunk.io",
+    "host": "192.168.99.101",
     "port": 6379
   },
   "websockets": {
@@ -20,7 +20,7 @@
   },
   "stash": {
     "type": "tcp",
-    "host": "cdsp.digitalfunk.io",
+    "host": "192.168.99.101",
     "port": 9600
   },
   "port": 7616,

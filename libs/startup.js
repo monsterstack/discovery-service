@@ -4,6 +4,7 @@ const glob = require('glob');
 const appRoot = require('app-root-path');
 const Health = require('./health.js');
 const config = require('config');
+const ServiceTypes = require('discovery-model').ServiceTypes;
 
 /**
  * Schedule Health Check
@@ -14,14 +15,16 @@ const scheduleHealthCheck = (model, masterCheck, interval) => {
       debug('health check');
       model.allServices().then((services) => {
         services.elements.forEach((service) => {
-          let health = new Health(/**{
-            bad_health_web_hook: config.health.webHookUrl
-          }**/);
-          health.check(service, true).then((response) => {
-            debug(response);
-          }).catch((err) => {
-            console.log(err);
-          });
+          if(service.class !== ServiceTypes.WORKER) {
+            let health = new Health(/**{
+              bad_health_web_hook: config.health.webHookUrl
+            }**/);
+            health.check(service, true).then((response) => {
+              debug(response);
+            }).catch((err) => {
+              console.log(err);
+            });
+          }
         });
       });
     }

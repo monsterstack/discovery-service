@@ -2,6 +2,7 @@
 const Promise = require('promise');
 const request = require('request');
 const model = require('discovery-model').model;
+const ServiceTypes = require('discovery-model').ServiceTypes;
 const WebHook = require('./webHook.js');
 const debug = require('debug')('discovery-health');
 
@@ -23,13 +24,18 @@ class Health {
   healthIsGoodFx(service) {
     let self = this;
     return (callback) => {
-      // checkService and callback(err) if failed
-      self.check(service).then((result) => {
-        console.log("No error");
+      // @TODO: Move this to discovery-model, no hard-coded types please.
+      if(service.class == ServiceTypes.WORKER) {
         callback(null);
-      }).catch((error) => {
-        callback(error);
-      });
+      } else {
+        // checkService and callback(err) if failed
+        self.check(service).then((result) => {
+          console.log("No error");
+          callback(null);
+        }).catch((error) => {
+          callback(error);
+        });
+      }
     }
   }
 
@@ -127,7 +133,7 @@ class Health {
             }
           } else {
             service.status = model.STATUS_OFFLINE;
-            if(update === true) {
+            if(update === true) { // @TODO: What the fuck is this...  Schedule code review please. Was this not done upstairs..?
               model.updateService(service).then((service) => {
                 if(service) {
                   debug(`updated service ${service.id}`);

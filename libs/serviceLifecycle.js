@@ -26,6 +26,7 @@ class ServiceLifecycle extends EventEmitter {
   constructor(io, ioredis, repo) {
     super();
     this.model = repo;
+    this.serviceTypes = require('discovery-model').ServiceTypes;
     this.io = io;
     this.ioredis = ioredis;
 
@@ -127,13 +128,17 @@ class ServiceLifecycle extends EventEmitter {
       }
 
       if(socket.service_id) {
-        debug(`Deleting Service ${socket.service_id}`);
-        this.model.deleteService(socket.service_id).then((result) => {
-          debug(`Deleted Service ${socket.service_id}`);
-          socket.broadcast.emit(REFRESH_EVENT, { serviceId: socket.service_id });
-        }).error((err) => {
-          console.log(err);
-        });
+        if(socket.service_type !== this.serviceTypes.WORKER) {
+          debug(`Deleting Service ${socket.service_id}`);
+          this.model.deleteService(socket.service_id).then((result) => {
+            debug(`Deleted Service ${socket.service_id}`);
+            socket.broadcast.emit(REFRESH_EVENT, { serviceId: socket.service_id });
+          }).error((err) => {
+            console.log(err);
+          });
+        } else {
+          debug('Ignoring delete on disconnect.  This is a Worker');
+        }
       } else {
         console.log(`Socket missing services id`);
       }
@@ -223,6 +228,7 @@ class ServiceLifecycle extends EventEmitter {
               // find by endpoint -- if not there save else update
               this.model.saveService(descriptor).then((service) => {
                 socket.service_id = service.id;
+                socket.service_type = service.class;
                 debug(`Updated Service Descriptor in registry for ${service.id}`);
                 socket.broadcast.emit(REFRESH_EVENT, { serviceId: service.id });
               }).error((err) => {
@@ -234,6 +240,7 @@ class ServiceLifecycle extends EventEmitter {
               descriptor.id = service.id;
               this.model.updateService(descriptor).then((updated) => {
                 socket.service_id = updated.id;
+                socket.service_type = updated.class;
                 debug(`Updated Service Descriptor in registry for ${updated.id}`);
                 socket.broadcast.emit(REFRESH_EVENT, { serviceId: updated.id});
               }).error((err) => {

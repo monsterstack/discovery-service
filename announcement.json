@@ -1,5 +1,6 @@
 {
   "name": "DiscoveryService",
+  "class": "Service",
   "region": "us-east-1",
   "stage": "dev",
   "version": "v1",

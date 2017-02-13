@@ -13,6 +13,9 @@ const scheduleHealthCheck = (model, masterCheck, interval) => {
   setInterval(() => {
     if(masterCheck()) {
       debug('health check');
+      // Test Message Broker Connectivity
+
+      // Check Services for health.
       model.allServices().then((services) => {
         services.elements.forEach((service) => {
           if(service.class !== ServiceTypes.WORKER) {

@@ -7,6 +7,14 @@ const express = require('express');
 const path = require('path');
 const startup = require('./libs/startup');
 
+/**
+ * Start Server
+ * Options:
+ * --randomWorkerPort ( true or false ) Do we bind to a random port ( used for child process being managed by cluster )
+ *                    or do we use the standard config.port.
+ * --announce         ( true or false ) Do we announce ourselves to the Discovery Service
+ * --discoveryHost ( Where do I Announce myself?  Where is my Discovery Service)
+ */
 const main = () => {
   let Health = require('./libs/health.js');
   let healthCheckInterval = config.healthCheck.interval;

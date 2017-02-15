@@ -6,6 +6,7 @@ const ServiceLifecycle = require('./libs/serviceLifecycle');
 const express = require('express');
 const path = require('path');
 const startup = require('./libs/startup');
+const _ = require('lodash');
 
 /**
  * Start Server
@@ -14,8 +15,14 @@ const startup = require('./libs/startup');
  *                    or do we use the standard config.port.
  * --announce         ( true or false ) Do we announce ourselves to the Discovery Service
  * --discoveryHost ( Where do I Announce myself?  Where is my Discovery Service)
+ * --overrides     ( path for config overrides )
  */
 const main = () => {
+  if(optimist.argv.overrides) {
+    let overrides = require(optimist.argv.overrides);
+    _.merge(config, overrides);
+  }
+
   let Health = require('./libs/health.js');
   let healthCheckInterval = config.healthCheck.interval;
 
@@ -40,6 +47,8 @@ const main = () => {
   if(optimist.argv.stage) {
     announcement.stage = optimist.argv.stage;
   }
+
+  
 
   let Server = require('core-server').Server;
   let server = new Server(announcement.name, announcement, typeQuery, {

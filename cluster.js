@@ -46,11 +46,9 @@ const main = () => {
   };
 
   startup.scheduleHealthCheck(model, masterCheck, healthCheckInterval);
-  /**
-  setInterval(() => {
-    cluster.announce();
-  }, 5*60*1000);
-  **/
+  // setInterval(() => {
+  //   cluster.reannounce();
+  // }, 5*60*1000);
 }
 
 

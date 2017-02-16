@@ -2,10 +2,8 @@
 
 const config = require('config');
 const optimist = require('optimist');
-const ServiceLifecycle = require('./libs/serviceLifecycle');
 const express = require('express');
 const path = require('path');
-const startup = require('./libs/startup');
 const _ = require('lodash');
 
 /**
@@ -22,6 +20,10 @@ const main = () => {
     let overrides = require(optimist.argv.overrides);
     _.merge(config, overrides);
   }
+
+  let startup = require('./libs/startup');
+  let ServiceLifecycle = require('./libs/serviceLifecycle');
+
 
   let Health = require('./libs/health.js');
   let healthCheckInterval = config.healthCheck.interval;

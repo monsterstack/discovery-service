@@ -4,6 +4,7 @@ const request = require('request');
 const model = require('discovery-model').model;
 const ServiceTypes = require('discovery-model').ServiceTypes;
 const WebHook = require('./webHook.js');
+const healthCheckRedis = require('health-check-redis');
 const debug = require('debug')('discovery-health');
 
 /**
@@ -17,6 +18,8 @@ class Health {
     if(options)
       this.badHealthWebHook = new WebHook(options.bad_health_web_hook);
   }
+
+  
 
   /**
    * Check health of service
@@ -57,6 +60,30 @@ class Health {
       // Need to check docs for existence
       callback(null);
     }
+  }
+
+  /**
+   * Check Message Broker Health
+   * @see health-check-redis
+   */
+  checkMessageBroker(hosts) {
+    return healthCheckRedis.do(hosts).then((result) => { 
+      if(result.health === true) {
+        model.markWorkersOnline().then(() => {
+          return result.health 
+        }).catch((err) => {
+          console.log(err);
+          return result.health;
+        });  
+      } else {
+        model.markWorkersOffline().then(() => {
+          return result.health 
+        }).catch((err) => {
+          console.log(err);
+          return result.health;
+        });  
+      }
+    } );
   }
 
   /**

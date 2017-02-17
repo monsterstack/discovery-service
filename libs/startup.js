@@ -30,6 +30,20 @@ const scheduleHealthCheck = (model, masterCheck, interval) => {
           }
         });
       });
+
+      // Check Message Broker
+      let health = new Health();
+      // Support for multiple brokers?? @TODO
+      health.checkMessageBroker([
+        {
+          host: config.redis.host,
+          port: config.redis.port
+        }
+      ]).then((isGood) => {
+        
+      }).catch((err) => {
+        console.log(err);
+      });
     }
   }, interval);
 }

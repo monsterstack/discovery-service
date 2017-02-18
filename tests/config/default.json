@@ -1,17 +1,27 @@
 {
   "db": {
-    "host":"localhost",
+    "host":"cdsp.digitalfunk.io",
     "port": 28015,
     "name": "cdsp"
+  },
+  "discovery": {
+    "host": "localhost",
+    "port": 7616
   },
   "health": {
     "webHookUrl": "http://foo.org"
   },
   "redis": {
-    "host": "u6-appserver-redis.uy6nek.0001.use1.cache.amazonaws.com"
+    "host": "cdsp.digitalfunk.io",
+    "port": 6379
   },
   "websockets": {
     "enabled": true
+  },
+  "stash": {
+    "type": "tcp",
+    "host": "cdsp.digitalfunk.io",
+    "port": 9600
   },
   "port": 7616,
   "healthCheck": {

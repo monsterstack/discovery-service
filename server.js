@@ -130,9 +130,10 @@ const main = () => {
 
       console.log(`Announce ${announce}`);
       if(announce === true) {
-        console.log('Announcing Existence')
-        server.announce(exitHandlerFactory, modelRepository);
+        console.log('Announcing Existence');
 
+        server.announce(exitHandlerFactory, modelRepository);
+        
         /** Health Check Schedule **/
         startup.scheduleHealthCheck(modelRepository, () => {
           return true;

@@ -46,9 +46,11 @@ const main = () => {
   };
 
   startup.scheduleHealthCheck(model, masterCheck, healthCheckInterval);
-  // setInterval(() => {
-  //   cluster.reannounce();
-  // }, 5*60*1000);
+  
+
+  cluster.onProxyReady((proxy) => {
+    console.log("Yeah.. the proxy is bound");
+  });
 }
 
 

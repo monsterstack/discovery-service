@@ -134,7 +134,6 @@ class ServiceLifecycle extends EventEmitter {
           console.log(`Deleting Service..........................................${socket.service_id}`)
           this.model.deleteService(socket.service_id).then((result) => {
             debug(`Deleted Service ${socket.service_id}`);
-            process.exit();
             socket.broadcast.emit(REFRESH_EVENT, { serviceId: socket.service_id });
           }).error((err) => {
             console.log(err);

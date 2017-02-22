@@ -50,6 +50,9 @@ const main = () => {
 
   cluster.onProxyReady((proxy) => {
     console.log("Yeah.. the proxy is bound");
+    setInterval(() => {
+      cluster.reannounce();
+    }, 2*60*1000);
   });
 }
 

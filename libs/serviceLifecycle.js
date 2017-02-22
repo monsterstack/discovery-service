@@ -105,6 +105,7 @@ class ServiceLifecycle extends EventEmitter {
       * are no longer needed.
       */
     socket.on('disconnect', (event) => {
+      console.log('Disconnect Event..........................');
       debug('Disconnect Event');
       debug(event);
       debug(key);
@@ -130,8 +131,10 @@ class ServiceLifecycle extends EventEmitter {
       if(socket.service_id) {
         if(socket.service_type !== this.serviceTypes.WORKER) {
           debug(`Deleting Service ${socket.service_id}`);
+          console.log(`Deleting Service..........................................${socker.service_id}`)
           this.model.deleteService(socket.service_id).then((result) => {
             debug(`Deleted Service ${socket.service_id}`);
+            process.exit();
             socket.broadcast.emit(REFRESH_EVENT, { serviceId: socket.service_id });
           }).error((err) => {
             console.log(err);

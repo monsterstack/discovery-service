@@ -131,7 +131,7 @@ class ServiceLifecycle extends EventEmitter {
       if(socket.service_id) {
         if(socket.service_type !== this.serviceTypes.WORKER) {
           debug(`Deleting Service ${socket.service_id}`);
-          console.log(`Deleting Service..........................................${socker.service_id}`)
+          console.log(`Deleting Service..........................................${socket.service_id}`)
           this.model.deleteService(socket.service_id).then((result) => {
             debug(`Deleted Service ${socket.service_id}`);
             process.exit();

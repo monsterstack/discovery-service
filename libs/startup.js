@@ -25,7 +25,7 @@ const scheduleHealthCheck = (model, masterCheck, interval) => {
             health.check(service, true).then((response) => {
               debug(response);
             }).catch((err) => {
-              console.log(err);
+              debug(err);
             });
           }
         });
@@ -42,7 +42,7 @@ const scheduleHealthCheck = (model, masterCheck, interval) => {
       ]).then((isGood) => {
         
       }).catch((err) => {
-        console.log(err);
+        debug(err);
       });
     }
   }, interval);

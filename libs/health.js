@@ -5,6 +5,7 @@ const model = require('discovery-model').model;
 const ServiceTypes = require('discovery-model').ServiceTypes;
 const WebHook = require('./webHook.js');
 const healthCheckRedis = require('health-check-redis');
+const EventEmitter = require('events');
 const debug = require('debug')('discovery-health');
 
 /**
@@ -13,8 +14,9 @@ const debug = require('debug')('discovery-health');
  * Can be configured to report health via 'webhook' to
  * third-party monitoring or notification tools.
  */
-class Health {
+class Health extends EventEmitter {
   constructor(options) {
+    super();
     if(options)
       this.badHealthWebHook = new WebHook(options.bad_health_web_hook);
   }
@@ -33,7 +35,7 @@ class Health {
       } else {
         // checkService and callback(err) if failed
         self.check(service).then((result) => {
-          console.log("No error");
+          debug('No Error found in Health Check... Yeah!');
           callback(null);
         }).catch((error) => {
           callback(error);
@@ -72,14 +74,14 @@ class Health {
         model.markWorkersOnline().then(() => {
           return result.health 
         }).catch((err) => {
-          console.log(err);
+          debug(err);
           return result.health;
         });  
       } else {
         model.markWorkersOffline().then(() => {
           return result.health 
         }).catch((err) => {
-          console.log(err);
+          debug(err);
           return result.health;
         });  
       }
@@ -106,7 +108,7 @@ class Health {
             // Delete
             if(update === true) {
               model.deleteService(service).then((deletedServices) => {
-                console.log("Service deleted");
+                debug("Service deleted");
               }).error((err) => {
                 debug(err);
               });
@@ -114,8 +116,8 @@ class Health {
           } else {
             // Flag offline...
             service.status = model.STATUS_OFFLINE;
-            console.log(model);
-            console.log(`Updating status ${service.status}`);
+            debug(model);
+            debug(`Updating status ${service.status}`);
             if(update === true) {
               model.updateService(service).then((service) => {
                 if(service) {
@@ -128,15 +130,16 @@ class Health {
             }
           }
         } else if(response.statusCode === 200) {
-          console.log(">>>>>>>>>RESPONSE 200");
+          debug(">>>>>>>>>RESPONSE 200");
           resolve(response.body);
+
           if(update === true) {
             // Get Service By Id and update Status to 'Online'
             model.findServiceById(service.id).then((service) => {
               if(service) {
                 service.status = model.STATUS_ONLINE;
-                console.log("Flagging online");
-                console.log(`Updating status ${service.status}`);
+                debug("Flagging online");
+                debug(`Updating status ${service.status}`);
                 model.updateService(service).then((service) => {
                   debug(`updated service ${service.id}`);
                 });
@@ -145,15 +148,15 @@ class Health {
           }
         } else {
           reject(response.body);
-          console.log(response.statusCode);
-          console.log(">>>>>>>>>RESPONSE NOT OK");
+          debug(response.statusCode);
+          debug(">>>>>>>>>RESPONSE NOT OK");
 
           // Get Service By Id and update Status to 'Offline'
           if(service.status === model.STATUS_OFFLINE) {
             // Delete
             if(update === true) {
               model.deleteService(service).then((deletedServices) => {
-                console.log("Service deleted");
+                debug("Service deleted");
               }).error((err) => {
                 debug(err);
               });

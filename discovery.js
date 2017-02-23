@@ -3,6 +3,7 @@ const config = require('config');
 const Cluster = require('core-server').Cluster;
 const startup = require('./libs/startup');
 const optimist = require('optimist');
+const debug = require('debug')('discovery-cluster');
 const _ = require('lodash');
 
 /**
@@ -47,9 +48,8 @@ const main = () => {
 
   startup.scheduleHealthCheck(model, masterCheck, healthCheckInterval);
   
-
   cluster.onProxyReady((proxy) => {
-    console.log("Yeah.. the proxy is bound");
+    debug("Yeah.. the proxy is bound");
     setInterval(() => {
       cluster.reannounce(config);
     }, 2*60*1000);

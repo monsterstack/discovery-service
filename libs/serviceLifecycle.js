@@ -105,7 +105,7 @@ class ServiceLifecycle extends EventEmitter {
       * are no longer needed.
       */
     socket.on('disconnect', (event) => {
-      console.log('Disconnect Event..........................');
+      debug('Disconnect Event..........................');
       debug('Disconnect Event');
       debug(event);
       debug(key);
@@ -131,18 +131,17 @@ class ServiceLifecycle extends EventEmitter {
       if(socket.service_id) {
         if(socket.service_type !== this.serviceTypes.WORKER) {
           debug(`Deleting Service ${socket.service_id}`);
-          console.log(`Deleting Service..........................................${socket.service_id}`)
           this.model.deleteService(socket.service_id).then((result) => {
             debug(`Deleted Service ${socket.service_id}`);
             socket.broadcast.emit(REFRESH_EVENT, { serviceId: socket.service_id });
           }).error((err) => {
-            console.log(err);
+            debug(err);
           });
         } else {
           debug('Ignoring delete on disconnect.  This is a Worker');
         }
       } else {
-        console.log(`Socket missing services id`);
+        debug(`Socket missing services id`);
       }
 
     }); // close on-disconnect
@@ -171,9 +170,9 @@ class ServiceLifecycle extends EventEmitter {
           if(clients) {
             clientCount = clients.length;
           }
-          console.log(`............................Client Count ${clientCount}`);
+          debug(`............................Client Count ${clientCount}`);
           if(clients) {
-            console.log(clients);
+            debug(clients);
             clients.forEach((client) => {
               if(change.isNew === true) {
                 this.emit('service.added', { feedKey: key, change: change.change });
@@ -361,8 +360,8 @@ class ServiceLifecycle extends EventEmitter {
           });
         }
       }).error((err) => {
-        console.log("Failed to find related service...");
-        console.log(err);
+        debug("Failed to find related service...");
+        debug(err);
       });
     }
   }

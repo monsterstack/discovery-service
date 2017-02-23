@@ -6,8 +6,11 @@
   "scripts": {
     "test": "mocha ./tests/*-test.js --reporter mocha-better-spec-reporter"
   },
-  "author": "",
+  "author": "zachary.rote@gmail.com",
   "license": "ISC",
+  "bin": {
+    "discovery": "./cluster.js"
+  },
   "dependencies": {
     "app-root-path": "^2.0.1",
     "async": "^2.1.4",

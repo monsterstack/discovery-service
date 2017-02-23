@@ -3,4 +3,4 @@ ADD . /code
 WORKDIR /code
 ENTRYPOINT ["bash", "entrypoint.sh"]
 RUN npm install
-CMD ["node", "cluster", "--numWorkers=1"]
+CMD ["node", "discovery", "--numWorkers=1"]

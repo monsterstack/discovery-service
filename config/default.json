@@ -1,6 +1,6 @@
 {
   "db": {
-    "host":"cdsp.digitalfunk.io",
+    "host":"rethink.digitalfunk.io",
     "port": 28015,
     "name": "cdsp"
   },
@@ -12,7 +12,7 @@
     "webHookUrl": "http://foo.org"
   },
   "redis": {
-    "host": "cdsp.digitalfunk.io",
+    "host": "redis.digitalfunk.io",
     "port": 6379
   },
   "websockets": {

@@ -9,9 +9,15 @@ services:
       - .:/code
     environment:
       - HOST_IP=${HOST_IP}
+      - REDIS_HOST_IP=${REDIS_HOST_IP}
+      - RETHINK_HOST_IP=${RETHINK_HOST_IP}
+      - ETCD_HOST_IP=${ETCD_HOST_IP}
       - SERVICE_NAME=DiscoveryService
       - STAGE=${STAGE}
       - CONFIG_HOST=${CONFIG_HOST}
       - CONFIG_PORT=${CONFIG_PORT}
     extra_hosts:
       - "cdsp.digitalfunk.io:${HOST_IP}"
+      - "rethink.digitalfunk.io:${RETHINK_HOST_IP}"
+      - "etcd.digitalfunk.io:${ETCD_HOST_IP}"
+      - "redis.digitalfunk.io:${REDIS_HOST_IP}"

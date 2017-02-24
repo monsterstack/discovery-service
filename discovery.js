@@ -1,6 +1,6 @@
 'use strict';
 const config = require('config');
-const Cluster = require('core-server').Cluster;
+const DiscoveryCluster = require('./libs/discoveryCluster').Cluster;
 const startup = require('./libs/startup');
 const optimist = require('optimist');
 const debug = require('debug')('discovery-cluster');
@@ -33,7 +33,7 @@ const main = () => {
   let proxy = require('discovery-proxy');
 
   let announcement = require('./announcement.json');
-  let cluster = new Cluster("DiscoveryService", announcement, options);
+  let cluster = new DiscoveryCluster(announcement, options);
   let exitHandler = proxy.exitHandlerFactory(cluster.id, model);
   cluster.bindExitHandler(exitHandler);
 
@@ -46,7 +46,15 @@ const main = () => {
     return cluster.iAmMaster;
   };
 
-  startup.scheduleHealthCheck(model, masterCheck, healthCheckInterval);
+  startup.scheduleHealthCheck(model, masterCheck, healthCheckInterval, cluster);
+
+  cluster.onLoadAvg((loadAvg) => {
+    console.log(loadAvg);
+  });
+
+  cluster.onCpuPercentUsage((cpuPercent) => {
+    console.log(cpuPercent);
+  });
   
   cluster.onProxyReady((proxy) => {
     debug("Yeah.. the proxy is bound");

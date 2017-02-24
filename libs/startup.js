@@ -6,10 +6,13 @@ const Health = require('./health.js');
 const config = require('config');
 const ServiceTypes = require('discovery-model').ServiceTypes;
 
+const LOAD_AVG_METRIC_NAME = 'load.avg.metric';
+const CPU_PERCENT_USAGE_METRIC_NAME = 'cpu.percent.usage.metric';
+
 /**
  * Schedule Health Check
  */
-const scheduleHealthCheck = (model, masterCheck, interval) => {
+const scheduleHealthCheck = (model, masterCheck, interval, emitter) => {
   setInterval(() => {
     if(masterCheck()) {
       debug('health check');
@@ -23,6 +26,8 @@ const scheduleHealthCheck = (model, masterCheck, interval) => {
               bad_health_web_hook: config.health.webHookUrl
             }**/);
             health.check(service, true).then((response) => {
+              emitter.emit(LOAD_AVG_METRIC_NAME, {serviceId: service.id, loadAvg: response.loadAvg});
+              emitter.emit(CPU_PERCENT_USAGE_METRIC_NAME, {serviceId: service.id, cpuPercentUsage: response.cpuPercentUsage});
               debug(response);
             }).catch((err) => {
               debug(err);
@@ -49,23 +54,6 @@ const scheduleHealthCheck = (model, masterCheck, interval) => {
 }
 
 /**
- * Load Http Routes
- */
-const loadHttpRoutes = (app, proxy) => {
-  glob(appRoot.path + "/api/v1/routes/*.routes.js", {}, (err, files) => {
-    files.forEach((file) => {
-      require(file)(app, proxy);
-    });
-  });
-
-  glob(appRoot.path + "/app/routes/*.routes.js", {}, (err, files) => {
-    files.forEach((file) => {
-      require(file)(app, proxy);
-    });
-  });
-}
-
-/**
  * Create Validation Pipeline
  */
 const createValidationPipeline = (descriptor) => {
@@ -79,5 +67,4 @@ const createValidationPipeline = (descriptor) => {
 
 // Public
 exports.scheduleHealthCheck = scheduleHealthCheck;
-exports.loadHttpRoutes = loadHttpRoutes;
 exports.createValidationPipeline = createValidationPipeline;

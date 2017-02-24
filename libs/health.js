@@ -131,7 +131,7 @@ class Health extends EventEmitter {
           }
         } else if(response.statusCode === 200) {
           debug(">>>>>>>>>RESPONSE 200");
-          resolve(response.body);
+          resolve(JSON.parse(response.body));
 
           if(update === true) {
             // Get Service By Id and update Status to 'Online'
@@ -147,7 +147,7 @@ class Health extends EventEmitter {
             });
           }
         } else {
-          reject(response.body);
+          reject(JSON.parse(response.body));
           debug(response.statusCode);
           debug(">>>>>>>>>RESPONSE NOT OK");
 

@@ -1,6 +1,9 @@
-web:
-    networks:
-        - back-tier
+version: '2'
+
+services:
+    web:
+        networks:
+            - back-tier
 networks:
     back-tier:
         driver: overlay

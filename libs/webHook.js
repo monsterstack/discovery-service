@@ -1,7 +1,7 @@
 'use strict';
 const needle = require('needle');
 const debug = require('debug')('discovery-web-hook');
-const Promise = require('Promise');
+const Promise = require('promise');
 
 /**
  * WebHook

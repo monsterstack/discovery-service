@@ -1,4 +1,4 @@
-version: '2'
+version: '3'
 
 services:
     web:
@@ -7,3 +7,7 @@ services:
 networks:
     back-tier:
         driver: overlay
+        ipam:
+          driver: default
+          config:
+            - subnet: 11.0.0.0/16

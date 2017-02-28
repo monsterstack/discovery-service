@@ -6,7 +6,7 @@ services:
     ports:
      - "7616:7616"
     volumes:
-      - .:/code
+      - /code
     environment:
       - HOST_IP=${HOST_IP}
       - REDIS_HOST_IP=${REDIS_HOST_IP}

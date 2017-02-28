@@ -6,8 +6,4 @@ services:
             - back-tier
 networks:
     back-tier:
-        driver: overlay
-        ipam:
-          driver: default
-          config:
-            - subnet: 11.0.0.0/16
+        external: true

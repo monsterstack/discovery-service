@@ -48,12 +48,33 @@ const main = () => {
 
   startup.scheduleHealthCheck(model, masterCheck, healthCheckInterval, cluster);
 
+  /**
+   * Record Load Average
+   */
   cluster.onLoadAvg((loadAvg) => {
     console.log(loadAvg);
+    let metric = {
+      name: `${loadAvg.serviceType.toLowercase()}.load.avg`,
+      value: loadAvg.loadAvg,
+      timestamp: Date.now()
+    };
+
+    cluster.recordMetric(metric);
   });
 
+  /**
+   * Record CPU Percentage
+   */
   cluster.onCpuPercentUsage((cpuPercent) => {
     console.log(cpuPercent);
+    let metric = {
+      name: `${cpuPercent.serviceType.toLowercase()}.cpu.percent.usage`,
+      value: cpuPercent.cpuPercentUsage,
+      timestamp: Date.now()
+    };
+
+    cluster.recordMetric(metric);
+
   });
   
   cluster.onProxyReady((proxy) => {

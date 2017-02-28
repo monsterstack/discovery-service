@@ -26,8 +26,16 @@ const scheduleHealthCheck = (model, masterCheck, interval, emitter) => {
               bad_health_web_hook: config.health.webHookUrl
             }**/);
             health.check(service, true).then((response) => {
-              emitter.emit(LOAD_AVG_METRIC_NAME, {serviceId: service.id, loadAvg: response.loadAvg});
-              emitter.emit(CPU_PERCENT_USAGE_METRIC_NAME, {serviceId: service.id, cpuPercentUsage: response.cpuPercentUsage});
+              emitter.emit(LOAD_AVG_METRIC_NAME, {
+                serviceId: service.id, 
+                serviceType: service.type, 
+                loadAvg: response.loadAvg
+              });
+              emitter.emit(CPU_PERCENT_USAGE_METRIC_NAME, {
+                serviceId: service.id, 
+                serviceType: service.type, 
+                cpuPercentUsage: response.cpuPercentUsage
+              });
               debug(response);
             }).catch((err) => {
               debug(err);

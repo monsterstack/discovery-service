@@ -1,5 +1,6 @@
 'use strict';
 const debug = require('debug')('discovery-startup');
+const async = require('async');
 const glob = require('glob');
 const appRoot = require('app-root-path');
 const Health = require('./health.js');
@@ -20,7 +21,7 @@ const scheduleHealthCheck = (model, masterCheck, interval, emitter) => {
 
       // Check Services for health.
       model.allServices().then((services) => {
-        services.elements.forEach((service) => {
+        async.each(services.elements, (service, cb) => {
           if(service.class !== ServiceTypes.WORKER) {
             let health = new Health(/**{
               bad_health_web_hook: config.health.webHookUrl
@@ -37,10 +38,16 @@ const scheduleHealthCheck = (model, masterCheck, interval, emitter) => {
                 cpuPercentUsage: response.cpuPercentUsage
               });
               debug(response);
+              cb();
             }).catch((err) => {
               debug(err);
+              cb();
             });
+          } else {
+            cb();
           }
+        }, (err) => {
+          console.log(err);
         });
       });
 

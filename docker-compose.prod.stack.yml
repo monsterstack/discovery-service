@@ -9,6 +9,9 @@ services:
       - back-tier
     volumes:
       - /code
+    labels:
+      interlock.hostname: "discovery"
+      interlock.domain: "digitalfunk.io"
     environment:
       - HOST_IP=${HOST_IP}
       - REDIS_HOST_IP=${REDIS_HOST_IP}
@@ -18,7 +21,6 @@ services:
       - STAGE=${STAGE}
       - CONFIG_HOST=${CONFIG_HOST}
       - CONFIG_PORT=${CONFIG_PORT}
-      - INTERLOCK_DATA={"hostname":"discovery", "domain":"digitalfunk.io"}
     extra_hosts:
       - "cdsp.digitalfunk.io:${HOST_IP}"
       - "rethink.digitalfunk.io:${RETHINK_HOST_IP}"

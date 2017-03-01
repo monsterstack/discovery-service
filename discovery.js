@@ -54,7 +54,7 @@ const main = () => {
   cluster.onLoadAvg((loadAvg) => {
     console.log(loadAvg);
     let metric = {
-      name: `${loadAvg.serviceType.toLowercase()}.load.avg`,
+      name: `${loadAvg.serviceType.toLowerCase()}.load.avg`,
       value: loadAvg.loadAvg,
       timestamp: Date.now()
     };
@@ -68,7 +68,7 @@ const main = () => {
   cluster.onCpuPercentUsage((cpuPercent) => {
     console.log(cpuPercent);
     let metric = {
-      name: `${cpuPercent.serviceType.toLowercase()}.cpu.percent.usage`,
+      name: `${cpuPercent.serviceType.toLowerCase()}.cpu.percent.usage`,
       value: cpuPercent.cpuPercentUsage,
       timestamp: Date.now()
     };

@@ -6,7 +6,7 @@ const async = require('async');
 const sha1 = require('sha1');
 const startup = require('./startup');
 const Promise = require('promise');
-const RESPONSE_TIME_METRIC_KEY = "response_time";
+const RESPONSE_TIME_METRIC_KEY = "response.time";
 const REFRESH_EVENT = "refresh_event";
 
 const EventEmitter = require('events').EventEmitter;
@@ -348,10 +348,10 @@ class ServiceLifecycle extends EventEmitter {
           // Compute avg
           let total = 0;
           let avg = 0;
-          for(let i in service.rtimes) {
-            total += service.rtimes[i];
+          service.rtimes.forEach((time) => {
+            total += time;
             avg = total/(service.rtimes.length);
-          }
+          });
 
           service.avgTime = avg;
 

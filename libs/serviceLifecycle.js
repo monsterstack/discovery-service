@@ -285,10 +285,10 @@ class ServiceLifecycle extends EventEmitter {
   handleOnline(onlineMessage, socket) {
     debug(onlineMessage);
     let serviceId = onlineMessage.serviceId;
-    model.findServiceById(serviceId).then((service) => {
+    this.model.findServiceById(serviceId).then((service) => {
       if(service) {
         service.status = this.model.STATUS_ONLINE;
-        model.updateService(service).then((service) => {
+        this.model.updateService(service).then((service) => {
           debug(`updated status of service ${service.id} to online`);
           socket.broadcast.emit(REFRESH_EVENT, { serviceId: socket.service_id });
         }).error((error) => {
@@ -312,7 +312,7 @@ class ServiceLifecycle extends EventEmitter {
     this.model.findServiceById(serviceId).then((service) => {
       if(service) {
         service.status = this.model.STATUS_OFFLINE;
-        model.updateService(service).then((service) => {
+        this.model.updateService(service).then((service) => {
           debug(`updated status of service ${service.id} to offline`);
           socket.broadcast.emit(REFRESH_EVENT, { serviceId: socket.service_id });
         }).error((error) => {
@@ -334,31 +334,38 @@ class ServiceLifecycle extends EventEmitter {
   handleMetrics(metric, socket) {
     let serviceId = metric.serviceId;
     let value = metric.value;
+    console.log(`Received metric ${metric.type} => ${metric.value} for ${metric.serviceId}`);
     if(metric.type === RESPONSE_TIME_METRIC_KEY) {
       // append response_time to service.rtimes
       this.model.findServiceById(serviceId).then((service) => {
         if(service.rtimes) {
-          if(service.rtimes.length > 0 && service.rtimes.length < 10){
-            service.rtimes.splice(0, 1);
-            service.rtimes.push(value);
-          } else {
-            service.rtimes.push(value);
-          }
-
-          // Compute avg
-          let total = 0;
-          let avg = 0;
-          service.rtimes.forEach((time) => {
-            total += time;
-            avg = total/(service.rtimes.length);
-          });
-
-          service.avgTime = avg;
-
-          model.updateService(service).then((updated) => {
-            debug(`Updated service ${service.id}`);
-          });
+          debug('Already have rtimes. No need to set');
+        } else {
+          service.rtimes = [];
         }
+
+        // Append the measurement.
+        if(service.rtimes.length == 10){
+          service.rtimes.splice(0, 1);
+          service.rtimes.push(value);
+        } else {
+          service.rtimes.push(value);
+        }
+
+        // Compute avg
+        let total = 0;
+        let avg = 0;
+        service.rtimes.forEach((time) => {
+          total += time;
+          avg = total/(service.rtimes.length);
+        });
+
+        service.avgTime = avg;
+
+        this.model.updateService(service).then((updated) => {
+          debug(`Updated service ${service.id}`);
+        });
+        
       }).error((err) => {
         debug("Failed to find related service...");
         debug(err);

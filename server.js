@@ -78,7 +78,8 @@ const main = () => {
       let modelRepository = require('discovery-model').model;
       let serviceLifecycle = new ServiceLifecycle(io, ioRedis, modelRepository);
 
-      // Feed Change
+      // Feed Change - @TODO Encapsulate the event keys in ServiceLifeCycle by adding methods like
+      // onFeedChange(cb), etc..
       serviceLifecycle.on('feed.change', (feeds) => {
         console.log("Feeds");
         console.log(Object.keys(feeds));

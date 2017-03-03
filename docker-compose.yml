@@ -5,6 +5,7 @@ services:
     build: .
     ports:
      - "7616:7616"
+     - "7617:7617"
     volumes:
       - /code
     environment:

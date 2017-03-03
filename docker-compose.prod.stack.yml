@@ -5,6 +5,7 @@ services:
     image: discoveryservice_web
     ports:
       - "7616:7616"
+      - "7617:7617"
     networks:
       - back-tier
     volumes:

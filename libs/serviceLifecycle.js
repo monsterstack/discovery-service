@@ -223,6 +223,7 @@ class ServiceLifecycle extends EventEmitter {
           debug(err);
         } else {
           // Save Descriptor
+          // @TODO: Try  to chain this promise!! (zachary.rote) ---------------------------
           this.model.findServiceByEndpoint(descriptor.endpoint).then((service) => {
             if(service === null) {
               // Save.
@@ -285,6 +286,7 @@ class ServiceLifecycle extends EventEmitter {
   handleOnline(onlineMessage, socket) {
     debug(onlineMessage);
     let serviceId = onlineMessage.serviceId;
+    // @TODO: Try  to chain this promise!! (zachary.rote) ---------------------------
     this.model.findServiceById(serviceId).then((service) => {
       if(service) {
         service.status = this.model.STATUS_ONLINE;
@@ -309,6 +311,7 @@ class ServiceLifecycle extends EventEmitter {
   handleOffline(offlineMessage, socket) {
     debug(offlineMessage);
     let serviceId = offlineMessage.serviceId;
+    // @TODO: Try  to chain this promise!! (zachary.rote) ---------------------------
     this.model.findServiceById(serviceId).then((service) => {
       if(service) {
         service.status = this.model.STATUS_OFFLINE;
@@ -337,6 +340,7 @@ class ServiceLifecycle extends EventEmitter {
     console.log(`Received metric ${metric.type} => ${metric.value} for ${metric.serviceId}`);
     if(metric.type === RESPONSE_TIME_METRIC_KEY) {
       // append response_time to service.rtimes
+      // @TODO: Try  to chain this promise!! (zachary.rote) ---------------------------
       this.model.findServiceById(serviceId).then((service) => {
         if(service.rtimes) {
           debug('Already have rtimes. No need to set');

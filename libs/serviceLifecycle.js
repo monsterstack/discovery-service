@@ -10,6 +10,7 @@ const RESPONSE_TIME_METRIC_KEY = "response.time";
 const REFRESH_EVENT = "refresh_event";
 const FORCE_SYNC = "force_sync";
 
+const FORCE_SYNC_INTERVAL = 120000;
 const EventEmitter = require('events').EventEmitter;
 
 /**
@@ -21,7 +22,8 @@ const EventEmitter = require('events').EventEmitter;
  * 4. Subscribe ( Ask to be notified of changes to ServiceDescriptor(s) of interest)
  * 5. Notify Discovery of Service deemed to be 'Online'
  * 6. Notify Discovery of Service deemed to be 'Offline'
- * 7. Websocket disconnect => Clean up Subscription if exists.
+ * 7. Periodic Force Sync broadcast to all services connected.
+ * 8. Websocket disconnect => Clean up Subscription if exists.
  */
 class ServiceLifecycle extends EventEmitter {
   constructor(io, ioredis, repo) {
@@ -44,12 +46,17 @@ class ServiceLifecycle extends EventEmitter {
     this.feeds = {};
     this.queries = {};
 
+    let forceSyncInterval = FORCE_SYNC_INTERVAL;
+    if(config.forceSync) {
+      forceSyncInterval = config.forceSync.interval || FORCE_SYNC_INTERVAL;
+    }
+
     setInterval(() => {
       debug(Object.keys(this.feeds));
 
       // Force Sync.
       this.io.emit(FORCE_SYNC, { timestamp: Date.now() });
-    }, 60000);
+    }, forceSyncInterval);
   }
 
   /**

@@ -291,7 +291,7 @@ class ServiceLifecycle extends EventEmitter {
     // Find services by types..
     this.model.findServicesByTypes(query.types).then((services) => {
       if(services)
-        socket.emit('services:sync', services);
+        socket.emit('services:sync', services.elements);
     });
   }
 

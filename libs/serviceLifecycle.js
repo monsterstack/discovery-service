@@ -8,6 +8,7 @@ const startup = require('./startup');
 const Promise = require('promise');
 const RESPONSE_TIME_METRIC_KEY = "response.time";
 const REFRESH_EVENT = "refresh_event";
+const FORCE_SYNC = "force_sync";
 
 const EventEmitter = require('events').EventEmitter;
 
@@ -45,7 +46,10 @@ class ServiceLifecycle extends EventEmitter {
 
     setInterval(() => {
       debug(Object.keys(this.feeds));
-    }, 30000);
+
+      // Force Sync.
+      this.io.emit(FORCE_SYNC, { timestamp: Date.now() });
+    }, 60000);
   }
 
   /**
@@ -275,6 +279,19 @@ class ServiceLifecycle extends EventEmitter {
         });
       });
     }
+  }
+
+  /**
+   * Handle Sync
+   */
+  handleSync(syncMessage, socket) {
+    debug(syncMessage);
+    let query = syncMessage.query;
+
+    // Find services by types..
+    this.model.findServicesByTypes(query.types).then((services) => {
+        this.emit('services:sync', services);
+    });
   }
 
   /**

@@ -127,6 +127,10 @@ const main = () => {
         socket.on('services:init', (msg) => {
           serviceLifecycle.handleInit(msg, socket);
         }); // -- close on-services.init
+
+        socket.on('services:sync', (msg) => {
+          serviceLifecycle.handleSync(msg, socket);
+        }); // -- close on-services.sync
       }); // -- close on-connection
 
       console.log(`Announce ${announce}`);

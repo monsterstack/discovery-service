@@ -8,6 +8,8 @@ const healthCheckRedis = require('health-check-redis');
 const EventEmitter = require('events');
 const debug = require('debug')('discovery-health');
 
+const DEFAULT_TIMEOUT = 15000;
+
 /**
  * Health
  * Responsible for verifying health of a service.
@@ -100,7 +102,7 @@ class Health extends EventEmitter {
       // Check the health of the service.
       // Would be nice if we had 'web-hook' integration here such that we can
       // inform interested parties of failed checks.
-      request.get(service.endpoint + service.healthCheckRoute, (error, response, body) => {
+      request.get(service.endpoint + service.healthCheckRoute, {timeout: DEFAULT_TIMEOUT}, (error, response, body) => {
         if(error) {
           reject(error);
           // Get Service By Id and update Status to 'Offline'

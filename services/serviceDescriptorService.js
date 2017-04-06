@@ -7,10 +7,10 @@ class ServiceDescriptorService {
   }
 
   countServices(typesArray, stage, region, status) {
-    let self = this;
+    let _this = this;
     let p = new Promise((resolve, reject) => {
 
-      self.model.countServices(typesArray, stage, region, status).then((count) => {
+      _this.model.countServices(typesArray, stage, region, status).then((count) => {
         resolve(count);
       }).error((err) => {
         reject(err);
@@ -20,9 +20,9 @@ class ServiceDescriptorService {
   }
 
   findUniqueServiceTypes() {
-    let self = this;
+    let _this = this;
     let p = new Promise((resolve, reject) => {
-      self.model.findUniqueServiceTypes().then((unique) => {
+      _this.model.findUniqueServiceTypes().then((unique) => {
         resolve(unique);
       }).error((err) => {
         reject(err);
@@ -33,9 +33,9 @@ class ServiceDescriptorService {
   }
 
   findServiceById(id) {
-    let self = this;
+    let _this = this;
     let p = new Promise((resolve, reject) => {
-      self.model.findServiceById(id).then((service) => {
+      _this.model.findServiceById(id).then((service) => {
         resolve(service);
       }).error((err) => {
         reject(err);
@@ -45,9 +45,9 @@ class ServiceDescriptorService {
   }
 
   deleteServiceById(id) {
-    let self = this;
+    let _this = this;
     let p = new Promise((resolve, reject) => {
-      self.model.deleteServiceById(id).then((service) => {
+      _this.model.deleteServiceById(id).then((service) => {
         resolve(service);
       }).error((err) => {
         reject(err);
@@ -58,11 +58,13 @@ class ServiceDescriptorService {
   }
 
   findServices(typesArray, stage, region, status, pageDescriptor) {
-    let self = this;
+    let _this = this;
     let p = new Promise((resolve, reject) => {
-      if(typesArray.length > 0) {
-        self.model.findServicesByTypes(typesArray, stage, region, status, pageDescriptor).then((services) => {
-          self.model.countServices(typesArray, stage, region, status).then((count) => {
+      if (typesArray.length > 0) {
+        // @TODO: Promise Chain Candidate
+        _this.model.findServicesByTypes(typesArray, stage,
+            region, status, pageDescriptor).then((services) => {
+          _this.model.countServices(typesArray, stage, region, status).then((count) => {
             services.page.total = count.count;
             resolve(services);
           }).error((err) => {
@@ -73,8 +75,9 @@ class ServiceDescriptorService {
         });
       } else {
         // Nothing to find.
-        self.model.allServices(stage, region, status, pageDescriptor).then((services) => {
-          self.model.countServices(null, stage, region, status).then((count) => {
+        // @TODO: Promise Chain Candidate
+        _this.model.allServices(stage, region, status, pageDescriptor).then((services) => {
+          _this.model.countServices(null, stage, region, status).then((count) => {
             services.page.total = count.count;
             resolve(services);
           }).error((err) => {

@@ -9,6 +9,7 @@
     "/constants": {
       "get": {
         "description": "Get Service Constants",
+        "operationId": "getConstants",
         "produces": [
           "application/json"
         ],
@@ -23,6 +24,7 @@
     "/health": {
       "get": {
         "description": "Get Health of Service",
+        "operationId": "getHealth",
         "tags": [
           "health"
         ],
@@ -246,14 +248,10 @@
       "type": "object",
       "required": [
         "cpuPercentUsage",
-        "totalMemPercentageUsage",
         "loadAvg"
       ],
       "properties": {
         "cpuPercentUsage": {
-          "type": "number"
-        },
-        "totalMemPercentageUsage": {
           "type": "number"
         },
         "loadAvg": {

@@ -11,8 +11,8 @@ class Leader {
     this.redisCli = redisCli;
     this.options = options;
 
-    if(this.redisCli)
-      this.me = new Bronto({client: this.redisCli});
+    if (this.redisCli)
+      this.me = new Bronto({ client: this.redisCli });
     else {
       this.me = new Bronto();
     }

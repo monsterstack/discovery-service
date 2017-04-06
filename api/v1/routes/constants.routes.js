@@ -3,7 +3,7 @@
 const controller = require('../controllers/constants.controller.js');
 
 /** Public **/
-module.exports = function(app) {
+module.exports = (app) => {
   /**
    * @swagger
    * /constants:

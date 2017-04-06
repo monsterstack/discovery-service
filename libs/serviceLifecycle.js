@@ -6,9 +6,9 @@ const async = require('async');
 const sha1 = require('sha1');
 const startup = require('./startup');
 const Promise = require('promise');
-const RESPONSE_TIME_METRIC_KEY = "response.time";
-const REFRESH_EVENT = "refresh_event";
-const FORCE_SYNC = "force_sync";
+const RESPONSE_TIME_METRIC_KEY = 'response.time';
+const REFRESH_EVENT = 'refresh_event';
+const FORCE_SYNC = 'force_sync';
 
 const FORCE_SYNC_INTERVAL = 120000;
 const EventEmitter = require('events').EventEmitter;
@@ -47,7 +47,7 @@ class ServiceLifecycle extends EventEmitter {
     this.queries = {};
 
     let forceSyncInterval = FORCE_SYNC_INTERVAL;
-    if(config.forceSync) {
+    if (config.forceSync) {
       forceSyncInterval = config.forceSync.interval || FORCE_SYNC_INTERVAL;
     }
 
@@ -75,24 +75,25 @@ class ServiceLifecycle extends EventEmitter {
       region: announce.region,
       stage: announce.stage,
       status: 'Online',
-      version: announce.version
+      version: announce.version,
     };
 
     let p = new Promise((resolve, reject) => {
       let ip = require('ip');
       debug(`IP is ${ip.address()}`);
-      descriptor.endpoint = "http://"+ip.address()+":"+config.port
+      descriptor.endpoint = 'http://' + ip.address() + ':' + config.port;
       resolve(descriptor);
     });
     return p;
   }
 
   authenticate() {
-
+    // @TODO: Implement Authentication On Websocket
+    debug('Authenticating Web Socket Client');
   }
 
   _addSubscriber(key, socket) {
-    if(this.subscribers[key].indexOf(socket.id) == -1)
+    if (this.subscribers[key].indexOf(socket.id) == -1)
       this.subscribers[key].push(socket.id);
   }
 
@@ -120,13 +121,13 @@ class ServiceLifecycle extends EventEmitter {
       debug('Disconnect Event');
       debug(event);
       debug(key);
-      if(this.subscribers[key]) {
+      if (this.subscribers[key]) {
         debug(`Socket id ${socket.id}`);
         debug(`Before ${this.subscribers[key]}`);
         let spliced = this.subscribers[key].splice(this.subscribers[key].indexOf(socket.id), 1);
         debug(`After ${this.subscribers[key]}`);
         /** Clean it up 'bish' **/
-        if(this.subscribers[key].length === 0) {
+        if (this.subscribers[key].length === 0) {
           // console.log(feeds[key]);
           //this.feeds[key].close();
           //this.feeds[key]._model.removeAllListeners();
@@ -136,11 +137,11 @@ class ServiceLifecycle extends EventEmitter {
           this.emit('feed.change', this.feeds);
         }
       } else {
-        debug("WARN - MISSING KEY ....... FEED DELETE FAILED");
+        debug('WARN - MISSING KEY ....... FEED DELETE FAILED');
       }
 
-      if(socket.service_id) {
-        if(socket.service_type !== this.serviceTypes.WORKER) {
+      if (socket.service_id) {
+        if (socket.service_type !== this.serviceTypes.WORKER) {
           debug(`Deleting Service ${socket.service_id}`);
           this.model.deleteService(socket.service_id).then((result) => {
             debug(`Deleted Service ${socket.service_id}`);
@@ -157,7 +158,7 @@ class ServiceLifecycle extends EventEmitter {
 
     }); // close on-disconnect
 
-    if(query.types && query.types.length > 0) {
+    if (query.types && query.types.length > 0) {
       this.queries[key] = query;
       this.emit('query.change', this.queries);
       /**
@@ -165,7 +166,7 @@ class ServiceLifecycle extends EventEmitter {
         * Also, keep track of the feed by query 'sha' such that the feed can
         * be closed when it's usefullness ceases to exist
         **/
-      if(this.subscribers[key]) {
+      if (this.subscribers[key]) {
         this._addSubscriber(key, socket);
         this.emit('subscriber.change', this.subscribers);
       } else {
@@ -178,17 +179,18 @@ class ServiceLifecycle extends EventEmitter {
           //let keys = Object.keys(this.subscribers);
           let clients = this.subscribers[key];
           let clientCount = 0;
-          if(clients) {
+          if (clients) {
             clientCount = clients.length;
           }
+
           debug(`............................Client Count ${clientCount}`);
-          if(clients) {
+          if (clients) {
             debug(clients);
             clients.forEach((client) => {
-              if(change.isNew === true) {
+              if (change.isNew === true) {
                 this.emit('service.added', { feedKey: key, change: change.change });
                 this.io.sockets.connected[client].emit('service.added', change.change);
-              } else if(change.deleted === true) {
+              } else if (change.deleted === true) {
                 this.emit('service.removed', { feedKey: key, change: change.change });
                 this.io.sockets.connected[client].emit('service.removed', change.change);
               } else {
@@ -198,7 +200,6 @@ class ServiceLifecycle extends EventEmitter {
             });
           }
         });
-
 
         myFeed.query = query;
         this.feeds[key] = myFeed;
@@ -225,18 +226,19 @@ class ServiceLifecycle extends EventEmitter {
     debug(initMessage);
     let query = initMessage;
     let descriptor = initMessage.descriptor;
+
     // Validate Descriptor and verify that the service is 'kosher'
-    if(descriptor) {
+    if (descriptor) {
       async.waterfall(
         startup.createValidationPipeline(descriptor),
         (err, results) => {
-        if(err) {
+        if (err) {
           debug(err);
         } else {
           // Save Descriptor
           // @TODO: Try  to chain this promise!! (zachary.rote) ---------------------------
           this.model.findServiceByEndpoint(descriptor.endpoint).then((service) => {
-            if(service === null) {
+            if (service === null) {
               // Save.
               // find by endpoint -- if not there save else update
               this.model.saveService(descriptor).then((service) => {
@@ -255,7 +257,7 @@ class ServiceLifecycle extends EventEmitter {
                 socket.service_id = updated.id;
                 socket.service_type = updated.class;
                 debug(`Updated Service Descriptor in registry for ${updated.id}`);
-                socket.broadcast.emit(REFRESH_EVENT, { serviceId: updated.id});
+                socket.broadcast.emit(REFRESH_EVENT, { serviceId: updated.id });
               }).error((err) => {
                 debug('Error registering service');
                 debug(err);
@@ -297,7 +299,7 @@ class ServiceLifecycle extends EventEmitter {
 
     // Find services by types..
     this.model.findServicesByTypes(query.types).then((services) => {
-      if(services)
+      if (services)
         socket.emit('services:sync', services.elements);
     });
   }
@@ -311,9 +313,10 @@ class ServiceLifecycle extends EventEmitter {
   handleOnline(onlineMessage, socket) {
     debug(onlineMessage);
     let serviceId = onlineMessage.serviceId;
-    // @TODO: Try  to chain this promise!! (zachary.rote) ---------------------------
+
+    // @TODO: Try  to chain this promise!! (zachary.rote)
     this.model.findServiceById(serviceId).then((service) => {
-      if(service) {
+      if (service) {
         service.status = this.model.STATUS_ONLINE;
         this.model.updateService(service).then((service) => {
           debug(`updated status of service ${service.id} to online`);
@@ -336,9 +339,10 @@ class ServiceLifecycle extends EventEmitter {
   handleOffline(offlineMessage, socket) {
     debug(offlineMessage);
     let serviceId = offlineMessage.serviceId;
-    // @TODO: Try  to chain this promise!! (zachary.rote) ---------------------------
+
+    // @TODO: Try  to chain this promise!! (zachary.rote)
     this.model.findServiceById(serviceId).then((service) => {
-      if(service) {
+      if (service) {
         service.status = this.model.STATUS_OFFLINE;
         this.model.updateService(service).then((service) => {
           debug(`updated status of service ${service.id} to offline`);
@@ -363,18 +367,19 @@ class ServiceLifecycle extends EventEmitter {
     let serviceId = metric.serviceId;
     let value = metric.value;
     console.log(`Received metric ${metric.type} => ${metric.value} for ${metric.serviceId}`);
-    if(metric.type === RESPONSE_TIME_METRIC_KEY) {
+    if (metric.type === RESPONSE_TIME_METRIC_KEY) {
+
       // append response_time to service.rtimes
-      // @TODO: Try  to chain this promise!! (zachary.rote) ---------------------------
+      // @TODO: Try  to chain this promise!! (zachary.rote)
       this.model.findServiceById(serviceId).then((service) => {
-        if(service.rtimes) {
+        if (service.rtimes) {
           debug('Already have rtimes. No need to set');
         } else {
           service.rtimes = [];
         }
 
         // Append the measurement.
-        if(service.rtimes.length == 10){
+        if (service.rtimes.length == 10) {
           service.rtimes.splice(0, 1);
           service.rtimes.push(value);
         } else {
@@ -386,7 +391,7 @@ class ServiceLifecycle extends EventEmitter {
         let avg = 0;
         service.rtimes.forEach((time) => {
           total += time;
-          avg = total/(service.rtimes.length);
+          avg = total / (service.rtimes.length);
         });
 
         service.avgTime = avg;
@@ -394,9 +399,9 @@ class ServiceLifecycle extends EventEmitter {
         this.model.updateService(service).then((updated) => {
           debug(`Updated service ${service.id}`);
         });
-        
+
       }).error((err) => {
-        debug("Failed to find related service...");
+        debug('Failed to find related service...');
         debug(err);
       });
     }

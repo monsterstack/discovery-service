@@ -14,7 +14,7 @@ class WebHook {
   emit(title, data) {
     let p = new Promise((resolve, reject) => {
       needle.post(this.url, this.asText(title, data), {}, (error, response) => {
-        if(error) {
+        if (error) {
           debug(error);
           reject(error);
         } else {
@@ -29,7 +29,9 @@ class WebHook {
   }
 
   asText(title, data) {
-    return `<b>${title}</b><br/><span>Service name: ${data.endpoint}&nbsp;Status: ${data.status}</span>`
+    let text = `<b>${title}</b><br/><span>Service name: ${data.endpoint}&nbsp;`
+      + `Status: ${data.status}</span>`;
+    return text;
   }
 }
 

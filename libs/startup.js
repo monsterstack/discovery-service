@@ -15,27 +15,28 @@ const CPU_PERCENT_USAGE_METRIC_NAME = 'cpu.percent.usage.metric';
  */
 const scheduleHealthCheck = (model, masterCheck, interval, emitter) => {
   setInterval(() => {
-    if(masterCheck()) {
+    if (masterCheck()) {
       debug('health check');
+
       // Test Message Broker Connectivity
 
       // Check Services for health.
       model.allServices().then((services) => {
         async.each(services.elements, (service, cb) => {
-          if(service.class !== ServiceTypes.WORKER) {
+          if (service.class !== ServiceTypes.WORKER) {
             let health = new Health(/**{
               bad_health_web_hook: config.health.webHookUrl
             }**/);
             health.check(service, true).then((response) => {
               emitter.emit(LOAD_AVG_METRIC_NAME, {
-                serviceId: service.id, 
-                serviceType: service.type, 
-                loadAvg: response.loadAvg
+                serviceId: service.id,
+                serviceType: service.type,
+                loadAvg: response.loadAvg,
               });
               emitter.emit(CPU_PERCENT_USAGE_METRIC_NAME, {
-                serviceId: service.id, 
-                serviceType: service.type, 
-                cpuPercentUsage: response.cpuPercentUsage
+                serviceId: service.id,
+                serviceType: service.type,
+                cpuPercentUsage: response.cpuPercentUsage,
               });
               debug(response);
               cb();
@@ -53,20 +54,21 @@ const scheduleHealthCheck = (model, masterCheck, interval, emitter) => {
 
       // Check Message Broker
       let health = new Health();
+
       // Support for multiple brokers?? @TODO
       health.checkMessageBroker([
         {
           host: config.redis.host,
-          port: config.redis.port
-        }
+          port: config.redis.port,
+        },
       ]).then((isGood) => {
-        
+        debug('Message Broker is Good');
       }).catch((err) => {
         debug(err);
       });
     }
   }, interval);
-}
+};
 
 /**
  * Create Validation Pipeline
@@ -75,10 +77,9 @@ const createValidationPipeline = (descriptor) => {
   return [
     new Health().swaggerIsGoodFx(descriptor),
     new Health().healthIsGoodFx(descriptor),
-    new Health().docsAreGoodFx(descriptor)
-  ]
-}
-
+    new Health().docsAreGoodFx(descriptor),
+  ];
+};
 
 // Public
 exports.scheduleHealthCheck = scheduleHealthCheck;

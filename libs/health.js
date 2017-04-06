@@ -19,31 +19,29 @@ const DEFAULT_TIMEOUT = 15000;
 class Health extends EventEmitter {
   constructor(options) {
     super();
-    if(options)
+    if (options)
       this.badHealthWebHook = new WebHook(options.bad_health_web_hook);
   }
-
-  
 
   /**
    * Check health of service
    */
   healthIsGoodFx(service) {
-    let self = this;
+    let _this = this;
     return (callback) => {
       // @TODO: Move this to discovery-model, no hard-coded types please.
-      if(service.class == ServiceTypes.WORKER) {
+      if (service.class == ServiceTypes.WORKER) {
         callback(null);
       } else {
         // checkService and callback(err) if failed
-        self.check(service).then((result) => {
+        _this.check(service).then((result) => {
           debug('No Error found in Health Check... Yeah!');
           callback(null);
         }).catch((error) => {
           callback(error);
         });
       }
-    }
+    };
   }
 
   /**
@@ -53,7 +51,7 @@ class Health extends EventEmitter {
     return (callback) => {
       // Need to check swagger.json for existence and validation
       callback(null);
-    }
+    };
   }
 
   /**
@@ -63,7 +61,7 @@ class Health extends EventEmitter {
     return (callback) => {
       // Need to check docs for existence
       callback(null);
-    }
+    };
   }
 
   /**
@@ -71,23 +69,23 @@ class Health extends EventEmitter {
    * @see health-check-redis
    */
   checkMessageBroker(hosts) {
-    return healthCheckRedis.do(hosts).then((result) => { 
-      if(result.health === true) {
+    return healthCheckRedis.do(hosts).then((result) => {
+      if (result.health === true) {
         model.markWorkersOnline().then(() => {
-          return result.health 
+          return result.health;
         }).catch((err) => {
           debug(err);
           return result.health;
-        });  
+        });
       } else {
         model.markWorkersOffline().then(() => {
-          return result.health 
+          return result.health;
         }).catch((err) => {
           debug(err);
           return result.health;
-        });  
+        });
       }
-    } );
+    });
   }
 
   /**
@@ -102,15 +100,17 @@ class Health extends EventEmitter {
       // Check the health of the service.
       // Would be nice if we had 'web-hook' integration here such that we can
       // inform interested parties of failed checks.
-      request.get(service.endpoint + service.healthCheckRoute, {timeout: DEFAULT_TIMEOUT}, (error, response, body) => {
-        if(error) {
+      request.get(service.endpoint + service.healthCheckRoute,
+        { timeout: DEFAULT_TIMEOUT }, (error, response, body) => {
+        if (error) {
           reject(error);
+
           // Get Service By Id and update Status to 'Offline'
-          if(service.status === model.STATUS_OFFLINE) {
+          if (service.status === model.STATUS_OFFLINE) {
             // Delete
-            if(update === true) {
+            if (update === true) {
               model.deleteService(service).then((deletedServices) => {
-                debug("Service deleted");
+                debug('Service deleted');
               }).error((err) => {
                 debug(err);
               });
@@ -120,27 +120,27 @@ class Health extends EventEmitter {
             service.status = model.STATUS_OFFLINE;
             debug(model);
             debug(`Updating status ${service.status}`);
-            if(update === true) {
+            if (update === true) {
               model.updateService(service).then((service) => {
-                if(service) {
+                if (service) {
                   debug(`updated service ${service.id}`);
-                  if(this.badHealthWebHook) {
+                  if (this.badHealthWebHook) {
                     this.badHealthWebHook.emit('Service Issue', service);
                   }
                 }
               });
             }
           }
-        } else if(response.statusCode === 200) {
-          debug(">>>>>>>>>RESPONSE 200");
+        } else if (response.statusCode === 200) {
+          debug('>>>>>>>>>RESPONSE 200');
           resolve(JSON.parse(response.body));
 
-          if(update === true) {
+          if (update === true) {
             // Get Service By Id and update Status to 'Online'
             model.findServiceById(service.id).then((service) => {
-              if(service) {
+              if (service) {
                 service.status = model.STATUS_ONLINE;
-                debug("Flagging online");
+                debug('Flagging online');
                 debug(`Updating status ${service.status}`);
                 model.updateService(service).then((service) => {
                   debug(`updated service ${service.id}`);
@@ -151,25 +151,28 @@ class Health extends EventEmitter {
         } else {
           reject(JSON.parse(response.body));
           debug(response.statusCode);
-          debug(">>>>>>>>>RESPONSE NOT OK");
+          debug('>>>>>>>>>RESPONSE NOT OK');
 
           // Get Service By Id and update Status to 'Offline'
-          if(service.status === model.STATUS_OFFLINE) {
+          if (service.status === model.STATUS_OFFLINE) {
             // Delete
-            if(update === true) {
+            if (update === true) {
               model.deleteService(service).then((deletedServices) => {
-                debug("Service deleted");
+                debug('Service deleted');
               }).error((err) => {
                 debug(err);
               });
             }
           } else {
             service.status = model.STATUS_OFFLINE;
-            if(update === true) { // @TODO: What the fuck is this...  Schedule code review please. Was this not done upstairs..?
+
+            // @TODO: What the fuck is this...
+            // Schedule code review please. Was this not done upstairs..?
+            if (update === true) {
               model.updateService(service).then((service) => {
-                if(service) {
+                if (service) {
                   debug(`updated service ${service.id}`);
-                  if(this.badHealthWebHook) {
+                  if (this.badHealthWebHook) {
                     this.badHealthWebHook.emit('Service Issue', service);
                   }
                 }

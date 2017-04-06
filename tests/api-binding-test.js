@@ -6,7 +6,7 @@ describe('discovery-api-binding', () => {
   let Server = require('core-server').Server;
   let server = null;
   before((done) => {
-    server = new Server("DiscoveryService", null, null, {});
+    server = new Server('DiscoveryService', null, null, {});
 
     server.init().then(() => {
       server.loadHttpRoutes();
@@ -28,20 +28,20 @@ describe('discovery-api-binding', () => {
 
     let service = {
       endpoint: 'http://localhost:7616',
-      schemaRoute: '/swagger.json'
+      schemaRoute: '/swagger.json',
     };
-    console.log("Creating Binding");
+    console.log('Creating Binding');
     let apiBinding = new ApiBinding(service);
 
     apiBinding.bind().then((service) => {
       console.log(`Checking Api...`);
-      if(service.api === undefined) {
-        console.log("Api is Null");
-        done(new Error("Api is null"));
-      } else if(service.api.health === undefined) {
-        done(new Error("Api Health is null"));
-      } else if(service.api.services === undefined) {
-        done(new Error("Api Services is null"));
+      if (service.api === undefined) {
+        console.log('Api is Null');
+        done(new Error('Api is null'));
+      } else if (service.api.health === undefined) {
+        done(new Error('Api Health is null'));
+      } else if (service.api.services === undefined) {
+        done(new Error('Api Services is null'));
       } else {
         done();
       }
@@ -53,8 +53,7 @@ describe('discovery-api-binding', () => {
   }).timeout(2000);
 
   after(() => {
-    
-    
+
   });
 
 });

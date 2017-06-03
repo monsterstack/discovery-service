@@ -366,7 +366,7 @@ class ServiceLifecycle extends EventEmitter {
   handleMetrics(metric, socket) {
     let serviceId = metric.serviceId;
     let value = metric.value;
-    console.log(`Received metric ${metric.type} => ${metric.value} for ${metric.serviceId}`);
+    debug(`Received metric ${metric.type} => ${metric.value} for ${metric.serviceId}`);
     if (metric.type === RESPONSE_TIME_METRIC_KEY) {
 
       // append response_time to service.rtimes
